@@ -2,7 +2,7 @@
 //  Pipe_SequenceUITests.swift
 //  Pipe-SequenceUITests
 //
-//  Created by Donghyun LEE on 2022/09/27.
+//  Created by Dongmin KIM on 2022/09/27.
 //
 
 import XCTest

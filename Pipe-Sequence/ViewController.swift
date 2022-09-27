@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  Pipe-Sequence
 //
-//  Created by Donghyun LEE on 2022/09/27.
+//  Created by Dong-Min KIM on 2022/09/27.
 //
 
 import UIKit
