@@ -9,18 +9,21 @@ import UIKit
 import SceneKit
 import ARKit
 
-class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
+class ViewController: UIViewController, ARSCNViewDelegate, SCNSceneRendererDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    
+    var device: MTLDevice!
+    var commandQueue: MTLCommandQueue!
+    var renderer: SCNRenderer!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupMetal()
+        
         // Set the view's delegate
         sceneView.delegate = self
-        
-        // Set the session delegate
-        sceneView.session.delegate = self
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
@@ -52,23 +55,31 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         // Pause the view's session
         sceneView.session.pause()
     }
-    
-    // MARK: - ARSessionDelegate
-    
-    func session(_ session: ARSession, didUpdate frame: ARFrame) {
-    }
 
     // MARK: - ARSCNViewDelegate
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-        print("frame updated")
-        return node
-    }
-*/
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        // Place content only for anchors found by plane detection.
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
         
+        // Create a custom object to visualize the plane geometry and extent.
+        let plane = Plane(anchor: planeAnchor, in: sceneView)
+        
+        // Add the visualization to the ARKit-managed node so that it tracks
+        // changes in the plane anchor as plane estimation continues.
+        node.addChildNode(plane)
+    }
+    
+    /// - Tag: UpdateARContent
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        // Update only anchors and nodes set up by `renderer(_:didAdd:for:)`.
+        guard let planeAnchor = anchor as? ARPlaneAnchor,
+            let plane = node.childNodes.first as? Plane
+            else { return }
+
+        // Update ARSCNPlaneGeometry to the anchor's new estimated shape.
+        if let planeGeometry = plane.meshNode.geometry as? ARSCNPlaneGeometry {
+            planeGeometry.update(from: planeAnchor.geometry)
+        }
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
@@ -84,5 +95,21 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
+    }
+    
+    // MARK: SCNSceneRendererDelegate
+    func renderer(_ renderer: SCNSceneRenderer, didRenderScene scene: SCNScene, atTime time: TimeInterval) {
+        
+    }
+    
+    // MARK: - Private methods
+    func setupMetal() {
+        if let defaultMtlDevice = MTLCreateSystemDefaultDevice() {
+            device = defaultMtlDevice
+            commandQueue = device.makeCommandQueue()
+            renderer = SCNRenderer(device: device, options: nil)
+        } else {
+            fatalError("iOS simulator does not support Metal, this example can only be run on a real device.")
+        }
     }
 }
