@@ -16,11 +16,18 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNSceneRendererDeleg
     var device: MTLDevice!
     var commandQueue: MTLCommandQueue!
     var renderer: SCNRenderer!
+    
+    // Set the original depth size.
+    let origDepthWidth = 256
+    let origDepthHeight = 192
+    
+    var offscreenTexture: MTLTexture!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupMetal()
+        setupTexture()
         
         // Set the view's delegate
         sceneView.delegate = self
@@ -111,5 +118,32 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNSceneRendererDeleg
         } else {
             fatalError("iOS simulator does not support Metal, this example can only be run on a real device.")
         }
+    }
+    
+    func setupTexture(){
+        let textureUsage = MTLTextureUsage(rawValue: MTLTextureUsage.renderTarget.rawValue | MTLTextureUsage.shaderRead.rawValue)
+        let texture = createTexture(metalDevice: device, width: origDepthWidth, height: origDepthHeight, usage: textureUsage, pixelFormat: MTLPixelFormat.rgba8Unorm)
+        
+        offscreenTexture = texture
+    }
+
+    func createTexture(metalDevice: MTLDevice, width: Int, height: Int, usage: MTLTextureUsage, pixelFormat: MTLPixelFormat) -> MTLTexture {
+        let descriptor: MTLTextureDescriptor = MTLTextureDescriptor()
+        descriptor.pixelFormat = pixelFormat
+        descriptor.width = width
+        descriptor.height = height
+        descriptor.usage = usage
+        let resTexture = metalDevice.makeTexture(descriptor: descriptor)
+        return resTexture!
+    }
+
+    func doRender(){
+        //rendering to a MTLTexture, so the viewport is the size of this texture
+        let viewport = CGRect(x: 0, y: 0, width: CGFloat(origDepthWidth), height: CGFloat(origDepthHeight))
+        
+        // use scene and camera pose
+        renderer.scene = sceneView.scene
+        renderer.pointOfView = sceneView.pointOfView
+//        renderer.render(atTime: 0, viewport: <#T##CGRect#>, commandBuffer: <#T##MTLCommandBuffer#>, passDescriptor: <#T##MTLRenderPassDescriptor#>)
     }
 }
