@@ -9,22 +9,25 @@ import UIKit
 import SceneKit
 import ARKit
 
-class ViewController: UIViewController, ARSCNViewDelegate {
+class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Set the view's delegate
         sceneView.delegate = self
         
+        // Set the session delegate
+        sceneView.session.delegate = self
+        
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
         // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
+        let scene = SCNScene()
+
         // Set the scene to the view
         sceneView.scene = scene
     }
@@ -34,6 +37,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
+        configuration.frameSemantics = .sceneDepth
+        configuration.worldAlignment = .gravity
+        configuration.isAutoFocusEnabled = false
+        configuration.planeDetection = [.horizontal, .vertical]
 
         // Run the view's session
         sceneView.session.run(configuration)
@@ -45,17 +52,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pause the view's session
         sceneView.session.pause()
     }
+    
+    // MARK: - ARSessionDelegate
+    
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+    }
 
     // MARK: - ARSCNViewDelegate
-    
 /*
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
         let node = SCNNode()
-     
+        print("frame updated")
         return node
     }
 */
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        
+    }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
