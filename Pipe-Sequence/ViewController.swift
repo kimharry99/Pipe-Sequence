@@ -9,13 +9,28 @@ import UIKit
 import SceneKit
 import ARKit
 
-class ViewController: UIViewController, ARSCNViewDelegate, SCNSceneRendererDelegate {
+//- Tag: ARData
+// Store depth-related AR data.
+final class ARData {
+    var timestamp: Double?
+    var depthImage: CVPixelBuffer?
+    var depthSmoothImage: CVPixelBuffer?
+    var colorImage: CVPixelBuffer?
+    var confidenceImage: CVPixelBuffer?
+    var confidenceSmoothImage: CVPixelBuffer?
+    var cameraIntrinsics = simd_float3x3()
+    var cameraResolution = CGSize()
+}
+
+class ViewController: UIViewController, ARSessionDelegate, ARSCNViewDelegate, SCNSceneRendererDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
     var device: MTLDevice!
     var commandQueue: MTLCommandQueue!
     var renderer: SCNRenderer!
+    
+    var arData = ARData()
     
     // Set the original depth size.
     let origDepthWidth = 256
@@ -62,6 +77,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNSceneRendererDeleg
         // Pause the view's session
         sceneView.session.pause()
     }
+    
+    // Send required data from `ARFrame` to the delegate class via the `onNewARData` callback.
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+      if(frame.sceneDepth != nil) && (frame.smoothedSceneDepth != nil) {
+          arData.timestamp = frame.timestamp
+          arData.depthImage = frame.sceneDepth?.depthMap
+          arData.depthSmoothImage = frame.smoothedSceneDepth?.depthMap
+          arData.confidenceImage = frame.sceneDepth?.confidenceMap
+          arData.confidenceSmoothImage = frame.smoothedSceneDepth?.confidenceMap
+          arData.colorImage = frame.capturedImage
+          arData.cameraIntrinsics = frame.camera.intrinsics
+          arData.cameraResolution = frame.camera.imageResolution
+      }
+    }
 
     // MARK: - ARSCNViewDelegate
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
@@ -106,7 +135,12 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNSceneRendererDeleg
     
     // MARK: SCNSceneRendererDelegate
     func renderer(_ renderer: SCNSceneRenderer, didRenderScene scene: SCNScene, atTime time: TimeInterval) {
-        
+        doRender()
+        let pngData = UIImage(texture: offscreenTexture).pngData()
+        var url = URL(fileURLWithPath: NSTemporaryDirectory())
+//        url.appendPathComponent(String(format: "%.0f.png", Float(arData.timestamp!)))
+        url.appendPathComponent(String(format: "1.png"))
+        try? pngData?.write(to: url)
     }
     
     // MARK: - Private methods
@@ -141,9 +175,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNSceneRendererDeleg
         //rendering to a MTLTexture, so the viewport is the size of this texture
         let viewport = CGRect(x: 0, y: 0, width: CGFloat(origDepthWidth), height: CGFloat(origDepthHeight))
         
+        //write to offscreenTexture, clear the texture before rendering using green, store the result
+        let renderPassDescriptor = MTLRenderPassDescriptor()
+        renderPassDescriptor.colorAttachments[0].texture = offscreenTexture
+        renderPassDescriptor.colorAttachments[0].loadAction = .clear
+        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 1, 0, 1.0); //green
+        renderPassDescriptor.colorAttachments[0].storeAction = .store
+
+        let commandBuffer = commandQueue.makeCommandBuffer()!
+        
         // use scene and camera pose
         renderer.scene = sceneView.scene
         renderer.pointOfView = sceneView.pointOfView
-//        renderer.render(atTime: 0, viewport: <#T##CGRect#>, commandBuffer: <#T##MTLCommandBuffer#>, passDescriptor: <#T##MTLRenderPassDescriptor#>)
+        renderer.render(atTime: 0, viewport: viewport, commandBuffer: commandBuffer, passDescriptor: renderPassDescriptor)
+        
+        commandBuffer.commit()
     }
 }
