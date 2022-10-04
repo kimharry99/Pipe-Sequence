@@ -24,6 +24,14 @@ class ViewController: UIViewController, MTKViewDelegate {
         // Set the view to use the default device
         if let view = self.view as? MTKView {
             view.device = MTLCreateSystemDefaultDevice()
+            view.backgroundColor = UIColor.clear
+            view.delegate = self
+            
+            guard view.device != nil else {
+                print("Metal is not supported on this device")
+                return
+            }
+            
             // Configure the renderer to draw to the view
             renderer = Renderer(device: view.device!, renderDestination: view)
         }

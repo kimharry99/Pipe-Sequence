@@ -37,14 +37,21 @@ class Renderer {
     var commandQueue: MTLCommandQueue!
     var imagePlaneVertexBuffer: MTLBuffer!
     var capturedImagePipelineState: MTLRenderPipelineState!
+    var capturedDepthStencilState: MTLDepthStencilState!
     
     init(device: MTLDevice, renderDestination: RenderDestinationProvider) {
         self.device = device
         self.renderDestination = renderDestination
         loadMetal()
     }
+    
+    func drawRectResized() {
+        
+    }
 
     func update(){
+        // Wait to ensure only kMaxBuffersInFlight are getting processed by any stage in the Metal
+        //   pipeline (App, Metal, Drivers, GPU, etc)
         let _ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
         
         if let commandBuffer = commandQueue.makeCommandBuffer(){
@@ -56,6 +63,9 @@ class Renderer {
                 
                 drawCapturedImage(renderEncoder: renderEncoder)
                 
+                // We're done encoding commands
+                renderEncoder.endEncoding()
+
                 // Schedule a present once the framebuffer is complete using the current drawable
                 commandBuffer.present(currentDrawable)
             }
@@ -71,6 +81,16 @@ class Renderer {
         renderDestination.depthStencilPixelFormat = .depth32Float_stencil8
         renderDestination.colorPixelFormat = .bgra8Unorm
         renderDestination.sampleCount = 1
+        
+        let imagePlaneVertexSize = kImagePlaneVertexData.count * MemoryLayout<Float>.size
+        imagePlaneVertexBuffer = device.makeBuffer(bytes: kImagePlaneVertexData, length: imagePlaneVertexSize, options: [])
+        imagePlaneVertexBuffer.label = "ImagePlaneVertexBuffer"
+        
+        // Load all the shader files with a metal file extension in the project
+        let defaultLibrary = device.makeDefaultLibrary()!
+        
+        let capturedImageVertexFunction = defaultLibrary.makeFunction(name: "capturedImageVertexTransform")!
+        let capturedImageFragmentFunction = defaultLibrary.makeFunction(name: "capturedImageFragmentShader")!
         
         let imageVertexDescriptor = MTLVertexDescriptor()
         
@@ -92,8 +112,8 @@ class Renderer {
         let capturedImagePipelineStateDescriptor = MTLRenderPipelineDescriptor()
         capturedImagePipelineStateDescriptor.label = "MyCapturedImagePipeline"
         capturedImagePipelineStateDescriptor.sampleCount = renderDestination.sampleCount
-//        capturedImagePipelineStateDescriptor.vertexFunction =
-//        capturedImagePipelineStateDescriptor.fragmentFunction =
+        capturedImagePipelineStateDescriptor.vertexFunction = capturedImageVertexFunction
+        capturedImagePipelineStateDescriptor.fragmentFunction = capturedImageFragmentFunction
         capturedImagePipelineStateDescriptor.vertexDescriptor = imageVertexDescriptor
         capturedImagePipelineStateDescriptor.colorAttachments[0].pixelFormat = renderDestination.colorPixelFormat
         capturedImagePipelineStateDescriptor.depthAttachmentPixelFormat = renderDestination.depthStencilPixelFormat
@@ -105,9 +125,13 @@ class Renderer {
             print ("Failed to created captured image pipeline state, error \(error)")
         }
         
-        let imagePlaneVertexSize = kImagePlaneVertexData.count * MemoryLayout<Float>.size
-        imagePlaneVertexBuffer = device.makeBuffer(bytes: kImagePlaneVertexData, length: imagePlaneVertexSize, options: [])
-        imagePlaneVertexBuffer.label = "ImagePlaneVertexBuffer"
+        let capturedImageDepthStateDescriptor = MTLDepthStencilDescriptor()
+        capturedImageDepthStateDescriptor.depthCompareFunction = .always
+        capturedImageDepthStateDescriptor.isDepthWriteEnabled = false
+        capturedDepthStencilState = device.makeDepthStencilState(descriptor: capturedImageDepthStateDescriptor)
+        
+        // Create the command queue
+        commandQueue = device.makeCommandQueue()
     }
     
     func drawCapturedImage(renderEncoder: MTLRenderCommandEncoder) {
@@ -117,16 +141,16 @@ class Renderer {
         
         // Set render command encoder state
         renderEncoder.setCullMode(.none)
-//        renderEncoder.setRenderPipelineState(<#T##pipelineState: MTLRenderPipelineState##MTLRenderPipelineState#>)
-//        renderEncoder.setDepthStencilState(<#T##depthStencilState: MTLDepthStencilState?##MTLDepthStencilState?#>)
+        renderEncoder.setRenderPipelineState(capturedImagePipelineState)
+        renderEncoder.setDepthStencilState(capturedDepthStencilState)
         
         // Set mesh's vertex buffers
-//        renderEncoder.setVertexBuffer(<#T##buffer: MTLBuffer?##MTLBuffer?#>, offset: <#T##Int#>, index: <#T##Int#>)
+        renderEncoder.setVertexBuffer(imagePlaneVertexBuffer, offset: 0, index: Int(kBufferIndexMeshPositions.rawValue))
         
         // Set any textures read/sampled from our render pipeline
         
         // Draw each submesh of our mesh
-//        renderEncoder.drawPrimitives(type: <#T##MTLPrimitiveType#>, vertexStart: <#T##Int#>, vertexCount: <#T##Int#>)
+        renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         
         renderEncoder.popDebugGroup()
     }
