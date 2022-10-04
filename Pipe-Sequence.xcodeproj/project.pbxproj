@@ -16,6 +16,8 @@
 		D835854028E32381004C5325 /* Pipe_SequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D835853F28E32381004C5325 /* Pipe_SequenceTests.swift */; };
 		D835854A28E32381004C5325 /* Pipe_SequenceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D835854928E32381004C5325 /* Pipe_SequenceUITests.swift */; };
 		D835854C28E32381004C5325 /* Pipe_SequenceUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D835854B28E32381004C5325 /* Pipe_SequenceUITestsLaunchTests.swift */; };
+		D84F2FA528EBC5E50076609E /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84F2FA428EBC5E50076609E /* Renderer.swift */; };
+		D84F2FA728EBE10E0076609E /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D84F2FA628EBE10E0076609E /* Shaders.metal */; };
 		D8E77A5628E474A100A81F15 /* VirtualObjectARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E77A5528E474A100A81F15 /* VirtualObjectARView.swift */; };
 		D8E77A5828E59A3500A81F15 /* Plane.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E77A5728E59A3500A81F15 /* Plane.swift */; };
 		D8E77A5A28E5C95400A81F15 /* UIImageMetalExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */; };
@@ -51,6 +53,9 @@
 		D835854528E32381004C5325 /* Pipe-SequenceUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Pipe-SequenceUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D835854928E32381004C5325 /* Pipe_SequenceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pipe_SequenceUITests.swift; sourceTree = "<group>"; };
 		D835854B28E32381004C5325 /* Pipe_SequenceUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pipe_SequenceUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		D84F2FA428EBC5E50076609E /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		D84F2FA628EBE10E0076609E /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		D84F2FA828EBE4000076609E /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		D8E77A5528E474A100A81F15 /* VirtualObjectARView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualObjectARView.swift; sourceTree = "<group>"; };
 		D8E77A5728E59A3500A81F15 /* Plane.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Plane.swift; sourceTree = "<group>"; };
 		D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageMetalExtensions.swift; sourceTree = "<group>"; };
@@ -113,6 +118,9 @@
 				D835852F28E32381004C5325 /* Main.storyboard */,
 				D835853228E32381004C5325 /* Assets.xcassets */,
 				D835853428E32381004C5325 /* LaunchScreen.storyboard */,
+				D84F2FA428EBC5E50076609E /* Renderer.swift */,
+				D84F2FA628EBE10E0076609E /* Shaders.metal */,
+				D84F2FA828EBE4000076609E /* ShaderTypes.h */,
 			);
 			path = "Pipe-Sequence";
 			sourceTree = "<group>";
@@ -267,9 +275,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				D8E77A5628E474A100A81F15 /* VirtualObjectARView.swift in Sources */,
+				D84F2FA728EBE10E0076609E /* Shaders.metal in Sources */,
 				D835852E28E32381004C5325 /* ViewController.swift in Sources */,
 				D8E77A5A28E5C95400A81F15 /* UIImageMetalExtensions.swift in Sources */,
 				D8E77A5828E59A3500A81F15 /* Plane.swift in Sources */,
+				D84F2FA528EBC5E50076609E /* Renderer.swift in Sources */,
 				D835852A28E32381004C5325 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
