@@ -2,7 +2,7 @@
 //  ShaderTypes.h
 //  Pipe-Sequence
 //
-//  Created by Donghyun LEE on 2022/10/04.
+//  Created by Dong-Min KIM on 2022/10/04.
 //
 
 #ifndef ShaderTypes_h

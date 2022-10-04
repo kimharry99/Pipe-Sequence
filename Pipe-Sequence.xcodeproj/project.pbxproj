@@ -56,6 +56,7 @@
 		D84F2FA428EBC5E50076609E /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		D84F2FA628EBE10E0076609E /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		D84F2FA828EBE4000076609E /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		D84F2FAA28EBEBB80076609E /* Pipe_Sequence-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Pipe_Sequence-Bridging-Header.h"; sourceTree = "<group>"; };
 		D8E77A5528E474A100A81F15 /* VirtualObjectARView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualObjectARView.swift; sourceTree = "<group>"; };
 		D8E77A5728E59A3500A81F15 /* Plane.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Plane.swift; sourceTree = "<group>"; };
 		D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageMetalExtensions.swift; sourceTree = "<group>"; };
@@ -109,6 +110,7 @@
 		D835852828E32380004C5325 /* Pipe-Sequence */ = {
 			isa = PBXGroup;
 			children = (
+				D84F2FAA28EBEBB80076609E /* Pipe_Sequence-Bridging-Header.h */,
 				D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */,
 				D8E77A5728E59A3500A81F15 /* Plane.swift */,
 				D8E77A5528E474A100A81F15 /* VirtualObjectARView.swift */,
@@ -475,6 +477,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Kim.Pipe-Sequence";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Pipe-Sequence/Pipe_Sequence-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -505,6 +508,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Kim.Pipe-Sequence";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Pipe-Sequence/Pipe_Sequence-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

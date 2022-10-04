@@ -12,6 +12,9 @@ import MetalKit
 protocol RenderDestinationProvider {
     var currentRenderPassDescriptor: MTLRenderPassDescriptor? { get }
     var currentDrawable: CAMetalDrawable? { get }
+    var colorPixelFormat: MTLPixelFormat { get set }
+    var depthStencilPixelFormat: MTLPixelFormat { get set }
+    var sampleCount: Int { get set }
 }
 
 // The max number of command buffers in flight
@@ -33,6 +36,7 @@ class Renderer {
     // Metal Objects
     var commandQueue: MTLCommandQueue!
     var imagePlaneVertexBuffer: MTLBuffer!
+    var capturedImagePipelineState: MTLRenderPipelineState!
     
     init(device: MTLDevice, renderDestination: RenderDestinationProvider) {
         self.device = device
@@ -64,6 +68,43 @@ class Renderer {
     // MARK: - Private
     
     func loadMetal() {
+        renderDestination.depthStencilPixelFormat = .depth32Float_stencil8
+        renderDestination.colorPixelFormat = .bgra8Unorm
+        renderDestination.sampleCount = 1
+        
+        let imageVertexDescriptor = MTLVertexDescriptor()
+        
+        // Positions.
+        imageVertexDescriptor.attributes[0].format = .float2
+        imageVertexDescriptor.attributes[0].offset = 0
+        imageVertexDescriptor.attributes[0].bufferIndex = Int(kBufferIndexMeshPositions.rawValue)
+        
+        // Texture Coordinates.
+        imageVertexDescriptor.attributes[1].format = .float2
+        imageVertexDescriptor.attributes[1].offset = 8
+        imageVertexDescriptor.attributes[0].bufferIndex = Int(kBufferIndexMeshPositions.rawValue)
+        
+        // Buffer layout
+        imageVertexDescriptor.layouts[0].stride = 16
+        imageVertexDescriptor.layouts[0].stepRate = 1
+        imageVertexDescriptor.layouts[0].stepFunction = .perVertex
+        
+        let capturedImagePipelineStateDescriptor = MTLRenderPipelineDescriptor()
+        capturedImagePipelineStateDescriptor.label = "MyCapturedImagePipeline"
+        capturedImagePipelineStateDescriptor.sampleCount = renderDestination.sampleCount
+//        capturedImagePipelineStateDescriptor.vertexFunction =
+//        capturedImagePipelineStateDescriptor.fragmentFunction =
+        capturedImagePipelineStateDescriptor.vertexDescriptor = imageVertexDescriptor
+        capturedImagePipelineStateDescriptor.colorAttachments[0].pixelFormat = renderDestination.colorPixelFormat
+        capturedImagePipelineStateDescriptor.depthAttachmentPixelFormat = renderDestination.depthStencilPixelFormat
+        capturedImagePipelineStateDescriptor.stencilAttachmentPixelFormat = renderDestination.depthStencilPixelFormat
+        
+        do {
+            try capturedImagePipelineState = device.makeRenderPipelineState(descriptor: capturedImagePipelineStateDescriptor)
+        } catch let error {
+            print ("Failed to created captured image pipeline state, error \(error)")
+        }
+        
         let imagePlaneVertexSize = kImagePlaneVertexData.count * MemoryLayout<Float>.size
         imagePlaneVertexBuffer = device.makeBuffer(bytes: kImagePlaneVertexData, length: imagePlaneVertexSize, options: [])
         imagePlaneVertexBuffer.label = "ImagePlaneVertexBuffer"
