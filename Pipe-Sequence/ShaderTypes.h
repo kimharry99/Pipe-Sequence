@@ -23,4 +23,12 @@ typedef enum VertexAttributes {
     kVertexAttributeNormal    = 2
 } VertexAttributes;
 
+// Texture index values shared between shader and C code to ensure Metal shader texture indices
+//   match indices of Metal API texture set calls
+typedef enum TextureIndices {
+    kTextureIndexColor    = 0,
+    kTextureIndexY        = 1,
+    kTextureIndexCbCr     = 2
+} TextureIndices;
+
 #endif /* ShaderTypes_h */

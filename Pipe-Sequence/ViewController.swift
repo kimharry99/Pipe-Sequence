@@ -14,12 +14,17 @@ import MetalKit
 extension MTKView: RenderDestinationProvider {
 }
 
-class ViewController: UIViewController, MTKViewDelegate {
+class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
+    var session: ARSession!
     var renderer: Renderer!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Set the view's delegate
+        session = ARSession()
+        session.delegate = self
         
         // Set the view to use the default device
         if let view = self.view as? MTKView {
@@ -33,8 +38,24 @@ class ViewController: UIViewController, MTKViewDelegate {
             }
             
             // Configure the renderer to draw to the view
-            renderer = Renderer(device: view.device!, renderDestination: view)
+            renderer = Renderer(session: session,  device: view.device!, renderDestination: view)
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // Create a session configuration
+        let configuration = ARWorldTrackingConfiguration()
+        
+        // Run the view's session
+        session.run(configuration)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        session.pause()
     }
 
     // MARK: - MTKViewDelegate

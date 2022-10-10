@@ -8,6 +8,7 @@
 import Foundation
 import Metal
 import MetalKit
+import ARKit
 
 protocol RenderDestinationProvider {
     var currentRenderPassDescriptor: MTLRenderPassDescriptor? { get }
@@ -29,6 +30,7 @@ let kImagePlaneVertexData: [Float] = [
 ]
 
 class Renderer {
+    let session: ARSession
     let device: MTLDevice
     let inFlightSemaphore = DispatchSemaphore(value: kMaxBuffersInFlight)
     var renderDestination: RenderDestinationProvider
@@ -37,9 +39,16 @@ class Renderer {
     var commandQueue: MTLCommandQueue!
     var imagePlaneVertexBuffer: MTLBuffer!
     var capturedImagePipelineState: MTLRenderPipelineState!
-    var capturedDepthStencilState: MTLDepthStencilState!
+    var capturedImageDepthState: MTLDepthStencilState!
+    var capturedImageTextureY: CVMetalTexture?
+    var capturedImageTextureCbCr: CVMetalTexture?
     
-    init(device: MTLDevice, renderDestination: RenderDestinationProvider) {
+    // Captured Image Texture Cache
+    var capturedImageTextureCache: CVMetalTextureCache!
+    
+    
+    init(session: ARSession, device: MTLDevice, renderDestination: RenderDestinationProvider) {
+        self.session = session
         self.device = device
         self.renderDestination = renderDestination
         loadMetal()
@@ -56,6 +65,24 @@ class Renderer {
         
         if let commandBuffer = commandQueue.makeCommandBuffer(){
             commandBuffer.label = "MyCommand"
+            
+            // Add completion handler which signal _inFlightSemaphore when Metal and the GPU has fully
+            //   finished processing the commands we're encoding this frame.  This indicates when the
+            //   dynamic buffers, that we're writing to this frame, will no longer be needed by Metal
+            //   and the GPU.
+            // Retain our CVMetalTextures for the duration of the rendering cycle. The MTLTextures
+            //   we use from the CVMetalTextures are not valid unless their parent CVMetalTextures
+            //   are retained. Since we may release our CVMetalTexture ivars during the rendering
+            //   cycle, we must retain them separately here.
+            var textures = [capturedImageTextureY, capturedImageTextureCbCr]
+            commandBuffer.addCompletedHandler{ [weak self] commandBuffer in
+                if let strongSelf = self {
+                    strongSelf.inFlightSemaphore.signal()
+                }
+                textures.removeAll()
+            }
+            
+            updateGameState()
             
             if let renderPassDescriptor = renderDestination.currentRenderPassDescriptor, let currentDrawable = renderDestination.currentDrawable, let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
                 
@@ -128,13 +155,55 @@ class Renderer {
         let capturedImageDepthStateDescriptor = MTLDepthStencilDescriptor()
         capturedImageDepthStateDescriptor.depthCompareFunction = .always
         capturedImageDepthStateDescriptor.isDepthWriteEnabled = false
-        capturedDepthStencilState = device.makeDepthStencilState(descriptor: capturedImageDepthStateDescriptor)
+        capturedImageDepthState = device.makeDepthStencilState(descriptor: capturedImageDepthStateDescriptor)
         
+        var textureCache: CVMetalTextureCache?
+        CVMetalTextureCacheCreate(nil, nil, device, nil, &textureCache)
+        capturedImageTextureCache = textureCache
+
         // Create the command queue
         commandQueue = device.makeCommandQueue()
     }
     
+    func updateGameState() {
+        // Update any game state
+        guard let currentFrame = session.currentFrame else {
+            return
+        }
+        
+        updateCapturedImageTextures(frame: currentFrame)
+    }
+    
+    func updateCapturedImageTextures(frame: ARFrame) {
+        // Create two textures (Y and CbCr) from the provided frame's captured image
+        let pixelBuffer = frame.capturedImage
+        
+        if(CVPixelBufferGetPlaneCount(pixelBuffer) < 2) {
+            return
+        }
+        
+        capturedImageTextureY = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: .r8Unorm, planeIndex: 0)
+        capturedImageTextureCbCr = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: .rg8Unorm, planeIndex: 1)
+    }
+    
+    func createTexture(fromPixelBuffer pixelBuffer: CVPixelBuffer, pixelFormat: MTLPixelFormat, planeIndex: Int) -> CVMetalTexture? {
+        let width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
+        let height = CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex)
+        
+        var texture: CVMetalTexture? = nil
+        let status = CVMetalTextureCacheCreateTextureFromImage(nil, capturedImageTextureCache, pixelBuffer, nil, pixelFormat, width, height, planeIndex, &texture)
+        
+        if status != kCVReturnSuccess {
+            texture = nil
+        }
+        
+        return texture
+    }
+    
     func drawCapturedImage(renderEncoder: MTLRenderCommandEncoder) {
+        guard let textureY = capturedImageTextureY, let textureCbCr = capturedImageTextureCbCr else {
+            return
+        }
         
         // Push a debug group allowing us to identify render commands in the GPU Frame Capture tool
         renderEncoder.pushDebugGroup("DrawCapturedImage")
@@ -142,12 +211,15 @@ class Renderer {
         // Set render command encoder state
         renderEncoder.setCullMode(.none)
         renderEncoder.setRenderPipelineState(capturedImagePipelineState)
-        renderEncoder.setDepthStencilState(capturedDepthStencilState)
+        renderEncoder.setDepthStencilState(capturedImageDepthState)
         
         // Set mesh's vertex buffers
         renderEncoder.setVertexBuffer(imagePlaneVertexBuffer, offset: 0, index: Int(kBufferIndexMeshPositions.rawValue))
         
         // Set any textures read/sampled from our render pipeline
+        renderEncoder.setFragmentTexture(CVMetalTextureGetTexture(textureY), index: Int(kTextureIndexY.rawValue))
+        renderEncoder.setFragmentTexture(CVMetalTextureGetTexture(textureCbCr), index: Int(kTextureIndexCbCr.rawValue))
+        
         
         // Draw each submesh of our mesh
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
