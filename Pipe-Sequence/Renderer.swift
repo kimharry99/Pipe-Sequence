@@ -46,6 +46,12 @@ class Renderer {
     // Captured Image Texture Cache
     var capturedImageTextureCache: CVMetalTextureCache!
     
+    // The current viewport size
+    var viewportSize: CGSize = CGSize()
+    
+    // Flag for viewport size changes
+    var viewportSizeDidChange: Bool = false
+    
     
     init(session: ARSession, device: MTLDevice, renderDestination: RenderDestinationProvider) {
         self.session = session
@@ -54,8 +60,9 @@ class Renderer {
         loadMetal()
     }
     
-    func drawRectResized() {
-        
+    func drawRectResized(size: CGSize) {
+        viewportSize = size
+        viewportSizeDidChange = true
     }
 
     func update(){
@@ -172,6 +179,12 @@ class Renderer {
         }
         
         updateCapturedImageTextures(frame: currentFrame)
+        
+        if viewportSizeDidChange {
+            viewportSizeDidChange = false
+            
+            updateImagePlane(frame: currentFrame)
+        }
     }
     
     func updateCapturedImageTextures(frame: ARFrame) {
@@ -198,6 +211,20 @@ class Renderer {
         }
         
         return texture
+    }
+    
+    func updateImagePlane(frame: ARFrame) {
+        // Update the texture coordinates of our image plane to aspect fill the viewport
+        let displayToCameraTransform = frame.displayTransform(for: .landscapeRight, viewportSize: viewportSize).inverted()
+
+        let vertexData = imagePlaneVertexBuffer.contents().assumingMemoryBound(to: Float.self)
+        for index in 0...3 {
+            let textureCoordIndex = 4 * index + 2
+            let textureCoord = CGPoint(x: CGFloat(kImagePlaneVertexData[textureCoordIndex]), y: CGFloat(kImagePlaneVertexData[textureCoordIndex + 1]))
+            let transformedCoord = textureCoord.applying(displayToCameraTransform)
+            vertexData[textureCoordIndex] = Float(transformedCoord.x)
+            vertexData[textureCoordIndex + 1] = Float(transformedCoord.y)
+        }
     }
     
     func drawCapturedImage(renderEncoder: MTLRenderCommandEncoder) {
