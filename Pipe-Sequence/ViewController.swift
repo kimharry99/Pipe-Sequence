@@ -18,6 +18,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
     var session: ARSession!
     var renderer: Renderer!
+    var textureCreator: TextureCreator!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +40,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
             
             // Configure the renderer to draw to the view
             renderer = Renderer(session: session,  device: view.device!, renderDestination: view)
+            textureCreator = TextureCreator(session: session)
         }
     }
     
@@ -67,6 +69,11 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
     // Called whenever the view needs to render
     func draw(in view: MTKView) {
+        // create MTLTexture from captured image from ARSession
+        let capturedImageTexture = textureCreator.create()
+        // set capture image texture to renderer as source texture
+        renderer.sourceTexture = capturedImageTexture
+        // render source texture to main view
         renderer.update()
     }
 }

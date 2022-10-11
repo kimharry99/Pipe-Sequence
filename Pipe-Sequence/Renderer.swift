@@ -42,6 +42,7 @@ class Renderer {
     var capturedImageDepthState: MTLDepthStencilState!
     var capturedImageTextureY: CVMetalTexture?
     var capturedImageTextureCbCr: CVMetalTexture?
+    var sourceTexture: CVMetalTexture?
     
     // Captured Image Texture Cache
     var capturedImageTextureCache: CVMetalTextureCache!
@@ -65,6 +66,7 @@ class Renderer {
         viewportSizeDidChange = true
     }
 
+    // TODO: Update to a source texture rendering
     func update(){
         // Wait to ensure only kMaxBuffersInFlight are getting processed by any stage in the Metal
         //   pipeline (App, Metal, Drivers, GPU, etc)
@@ -111,6 +113,7 @@ class Renderer {
     
     // MARK: - Private
     
+    // TODO: Update to source texture rendering objects
     func loadMetal() {
         renderDestination.depthStencilPixelFormat = .depth32Float_stencil8
         renderDestination.colorPixelFormat = .bgra8Unorm
@@ -172,6 +175,7 @@ class Renderer {
         commandQueue = device.makeCommandQueue()
     }
     
+    // TODO: Remove this
     func updateGameState() {
         // Update any game state
         guard let currentFrame = session.currentFrame else {
@@ -187,6 +191,7 @@ class Renderer {
         }
     }
     
+    // TODO: Remove this
     func updateCapturedImageTextures(frame: ARFrame) {
         // Create two textures (Y and CbCr) from the provided frame's captured image
         let pixelBuffer = frame.capturedImage
@@ -199,6 +204,7 @@ class Renderer {
         capturedImageTextureCbCr = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: .rg8Unorm, planeIndex: 1)
     }
     
+    // TODO: Remove this
     func createTexture(fromPixelBuffer pixelBuffer: CVPixelBuffer, pixelFormat: MTLPixelFormat, planeIndex: Int) -> CVMetalTexture? {
         let width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
         let height = CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex)
@@ -227,6 +233,7 @@ class Renderer {
         }
     }
     
+    // TODO: Update to draw a source texture
     func drawCapturedImage(renderEncoder: MTLRenderCommandEncoder) {
         guard let textureY = capturedImageTextureY, let textureCbCr = capturedImageTextureCbCr else {
             return
