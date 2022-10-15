@@ -42,7 +42,7 @@ class Renderer {
     var capturedImageDepthState: MTLDepthStencilState!
     var capturedImageTextureY: CVMetalTexture?
     var capturedImageTextureCbCr: CVMetalTexture?
-    var sourceTexture: CVMetalTexture?
+    var sourceTexture: MTLTexture!
     
     // Captured Image Texture Cache
     var capturedImageTextureCache: CVMetalTextureCache!

@@ -17,6 +17,7 @@ extension MTKView: RenderDestinationProvider {
 class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
     var session: ARSession!
+    var pipeSequenceRecorder: PipeSequenceRecorder!
     var renderer: Renderer!
     var textureCreator: TextureCreator!
 
@@ -38,9 +39,8 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
                 return
             }
             
-            // Configure the renderer to draw to the view
-            renderer = Renderer(session: session,  device: view.device!, renderDestination: view)
-            textureCreator = TextureCreator(session: session)
+            // Configure the recorder to record the sequence
+            pipeSequenceRecorder = PipeSequenceRecorder(session: session, device: view.device!, renderDestination: view)
         }
     }
     
@@ -69,11 +69,6 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
     // Called whenever the view needs to render
     func draw(in view: MTKView) {
-        // create MTLTexture from captured image from ARSession
-        let capturedImageTexture = textureCreator.create()
-        // set capture image texture to renderer as source texture
-        renderer.sourceTexture = capturedImageTexture
-        // render source texture to main view
-        renderer.update()
+        pipeSequenceRecorder.update()
     }
 }
