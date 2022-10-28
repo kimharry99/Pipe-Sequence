@@ -8,18 +8,43 @@
 import Foundation
 import ARKit
 
+class ARTextureContainer {
+    var colorTexture: MTLTexture
+    var depthTexture: MTLTexture?
+    var confiTexture: MTLTexture?
+    var valid: Bool
+    
+    init(device: MTLDevice) {
+        // init target texture
+        let texDescriptor = MTLTextureDescriptor()
+        texDescriptor.textureType = .type2D
+        texDescriptor.width = 512
+        texDescriptor.height = 512
+        texDescriptor.pixelFormat = .rgba8Unorm
+        texDescriptor.usage = [.renderTarget, .shaderRead]
+        // alternative code
+        // texDescriptor.usage = MTLTextureUsage(rawValue: MTLTextureUsage.renderTarget.rawValue | MTLTextureUsage.shaderRead.rawValue)
+        colorTexture = device.makeTexture(descriptor: texDescriptor)!
+
+        valid = false
+    }
+}
+
 class PipeSequenceRecorder {
     var textureCreator: TextureCreator
     var renderer: Renderer
     
     let commandQueue: MTLCommandQueue!
     
+    let arTextures: ARTextureContainer
+    
     init(session: ARSession, device: MTLDevice, renderDestination: RenderDestinationProvider){
-        self.textureCreator = TextureCreator(session: session, device: device)
+        self.arTextures = ARTextureContainer(device: device)
+        self.textureCreator = TextureCreator(session: session, device: device, arTextures: arTextures)
         self.renderer = Renderer(session: session, device: device, renderDestination: renderDestination)
 
         // set capture image texture to renderer as source texture
-        renderer.sourceTexture = textureCreator.renderResultTexture
+        // renderer.sourceTexture = textureCreator.renderResultTexture
         
         // init metal objects
         commandQueue = device.makeCommandQueue()

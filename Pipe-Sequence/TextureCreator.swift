@@ -14,6 +14,7 @@ import ARKit
 class TextureCreator {
     let session: ARSession
     let device: MTLDevice
+    let arTextures: ARTextureContainer
     
     // Vertex data for an image plane
     let kImagePlaneVertexData: [Float] = [
@@ -32,14 +33,15 @@ class TextureCreator {
     var imagePlaneVertexBuffer: MTLBuffer!
     
     // Result Texture
-    var renderResultTexture: MTLTexture!
+//    var renderResultTexture: MTLTexture!
 
     // Source Image Texture Cache
     var sourceTextureCache: CVMetalTextureCache!
 
-    init(session: ARSession, device: MTLDevice) {
+    init(session: ARSession, device: MTLDevice, arTextures: ARTextureContainer) {
         self.session = session
         self.device = device
+        self.arTextures = arTextures
         
         loadMetal()
     }
@@ -90,20 +92,20 @@ class TextureCreator {
         imageVertexDescriptor.layouts[0].stepFunction = .perVertex
 
         // init target texture
-        let texDescriptor = MTLTextureDescriptor()
-        texDescriptor.textureType = .type2D
-        texDescriptor.width = 512
-        texDescriptor.height = 512
-        texDescriptor.pixelFormat = .rgba8Unorm
-        texDescriptor.usage = [.renderTarget, .shaderRead]
+//        let texDescriptor = MTLTextureDescriptor()
+//        texDescriptor.textureType = .type2D
+//        texDescriptor.width = 512
+//        texDescriptor.height = 512
+//        texDescriptor.pixelFormat = .rgba8Unorm
+//        texDescriptor.usage = [.renderTarget, .shaderRead]
         // alternative code
         // texDescriptor.usage = MTLTextureUsage(rawValue: MTLTextureUsage.renderTarget.rawValue | MTLTextureUsage.shaderRead.rawValue)
         
-        renderResultTexture = device.makeTexture(descriptor: texDescriptor)!
+//        renderResultTexture = device.makeTexture(descriptor: texDescriptor)!
         
         // init renderPassDescriptor
         renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0].texture = renderResultTexture
+        renderPassDescriptor.colorAttachments[0].texture = arTextures.colorTexture
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(1, 1, 1, 1)
         renderPassDescriptor.colorAttachments[0].storeAction = .store
@@ -115,7 +117,7 @@ class TextureCreator {
         renderToTargetPipelineStateDescriptor.vertexFunction = capturedImageVertexFunction
         renderToTargetPipelineStateDescriptor.fragmentFunction = capturedImageFragmentFunction
         renderToTargetPipelineStateDescriptor.vertexDescriptor = imageVertexDescriptor
-        renderToTargetPipelineStateDescriptor.colorAttachments[0].pixelFormat = renderResultTexture.pixelFormat
+        renderToTargetPipelineStateDescriptor.colorAttachments[0].pixelFormat = arTextures.colorTexture.pixelFormat
         
         do {
             try renderToTargetPipelineState = device.makeRenderPipelineState(descriptor: renderToTargetPipelineStateDescriptor)
