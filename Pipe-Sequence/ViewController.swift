@@ -49,6 +49,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
+        configuration.frameSemantics = .sceneDepth
         
         // Run the view's session
         session.run(configuration)
@@ -64,7 +65,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
     // Called whenever view changes orientation or layout is changed
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        renderer.drawRectResized(size: size)
+//        renderer.drawRectResized(size: size)
     }
     
     // Called whenever the view needs to render

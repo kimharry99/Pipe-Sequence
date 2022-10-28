@@ -30,6 +30,8 @@ class TextureCreator {
     var renderToTargetPipelineState: MTLRenderPipelineState!
     var capturedImageTextureY: CVMetalTexture?
     var capturedImageTextureCbCr: CVMetalTexture?
+    var cvDepthTexture: CVMetalTexture?
+    var cvConfiTexture: CVMetalTexture?
     var imagePlaneVertexBuffer: MTLBuffer!
     
     // Result Texture
@@ -55,6 +57,8 @@ class TextureCreator {
         if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
             
             drawCapturedImage(renderEncoder: renderEncoder)
+            makeDepthTexture()
+            makeConfiTexture()
             
             renderEncoder.endEncoding()
         }
@@ -135,14 +139,51 @@ class TextureCreator {
             return
         }
         // Create two textures (Y and CbCr) from the provided frame's captured image
-        let pixelBuffer = currentFrame.capturedImage
-        
-        if(CVPixelBufferGetPlaneCount(pixelBuffer) < 2) {
+        updateCapturedImageTextures(frame: currentFrame)
+
+        // Prepare the current frame's depth and confidence images for transfer to the GPU.
+        updateARDepthTexures(frame: currentFrame)
+    }
+
+    // Creates two textures (Y and CbCr) to transfer the current frame's camera image to the GPU for rendering.
+    func updateCapturedImageTextures(frame: ARFrame) {
+        if CVPixelBufferGetPlaneCount(frame.capturedImage) < 2 {
             return
         }
+        capturedImageTextureY = createTexture(fromPixelBuffer: frame.capturedImage, pixelFormat: .r8Unorm, planeIndex: 0)
+        capturedImageTextureCbCr = createTexture(fromPixelBuffer: frame.capturedImage, pixelFormat: .rg8Unorm, planeIndex: 1)
+    }
+
+    // Assigns an appropriate MTL pixel format given the argument pixel-buffer's format.
+    fileprivate func setMTLPixelFormat(_ texturePixelFormat: inout MTLPixelFormat?, basedOn pixelBuffer: CVPixelBuffer!) {
+        if CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_DepthFloat32 {
+            texturePixelFormat = .r32Float
+        } else if CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_OneComponent8 {
+            texturePixelFormat = .r8Uint
+        } else {
+            fatalError("Unsupported ARDepthData pixel-buffer format.")
+        }
+    }
+
+    // Prepares the scene depth information for transfer to the GPU for rendering.
+    func updateARDepthTexures(frame: ARFrame) {
+        // Get the scene depth or smoothed scene depth from the current frame.
+        guard let sceneDepth = frame.sceneDepth else {
+            print("Failed to acquire scene depth.")
+            return
+        }
+        var pixelBuffer: CVPixelBuffer!
+        pixelBuffer = sceneDepth.depthMap
         
-        capturedImageTextureY = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: .r8Unorm, planeIndex: 0)
-        capturedImageTextureCbCr = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: .rg8Unorm, planeIndex: 1)
+        // Create a Metal texture from the depth image provided by ARKit.
+        var texturePixelFormat: MTLPixelFormat!
+        setMTLPixelFormat(&texturePixelFormat, basedOn: pixelBuffer)
+        cvDepthTexture = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: texturePixelFormat, planeIndex: 0)
+
+        // Get the current depth confidence values from the current frame.
+        pixelBuffer = sceneDepth.confidenceMap
+        setMTLPixelFormat(&texturePixelFormat, basedOn: pixelBuffer)
+        cvConfiTexture = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: texturePixelFormat, planeIndex: 0)
     }
 
     func createTexture(fromPixelBuffer pixelBuffer: CVPixelBuffer, pixelFormat: MTLPixelFormat, planeIndex: Int) -> CVMetalTexture? {
@@ -176,5 +217,19 @@ class TextureCreator {
         
         // call drawing primitive
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+    }
+    
+    func makeDepthTexture(){
+        guard let depthTexture = cvDepthTexture else {
+            return
+        }
+        arTextures.depthTexture = CVMetalTextureGetTexture(depthTexture)
+    }
+    
+    func makeConfiTexture(){
+        guard let confiTexture = cvConfiTexture else {
+            return
+        }
+        arTextures.confiTexture = CVMetalTextureGetTexture(confiTexture)
     }
 }
