@@ -43,15 +43,29 @@ private let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
 
 extension UIImage {
     convenience init(texture: MTLTexture) {
-        let bitsPerComponent = 8
-        let bitsPerPixel = 32
-        let bytesPerRow = texture.width * 4
-        let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo:CGBitmapInfo = [.byteOrder32Big, CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)]
-            
-        let cgim = CGImage.init(width: texture.width, height: texture.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bitsPerPixel, bytesPerRow: bytesPerRow, space: rgbColorSpace, bitmapInfo: bitmapInfo, provider: UIImage.dataProviderRefFrom(texture: texture), decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        if texture.height > 1 {
+            // rgba color texture
+            let bitsPerComponent = 8
+            let bitsPerPixel = 32
+            let bytesPerRow = texture.width * 4
+            let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
+            let bitmapInfo:CGBitmapInfo = [.byteOrder32Big, CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)]
+                
+            let cgim = CGImage.init(width: texture.width, height: texture.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bitsPerPixel, bytesPerRow: bytesPerRow, space: rgbColorSpace, bitmapInfo: bitmapInfo, provider: UIImage.dataProviderRefFrom(texture: texture), decode: nil, shouldInterpolate: false, intent: .defaultIntent)
 
-        self.init(cgImage: cgim!)
+            self.init(cgImage: cgim!)
+        } else {
+            // depth texture
+            let bitsPerComponent = 16
+            let bitsPerPixel = 16
+            let bytesPerRow = texture.width * 2
+            let grayColorSpace = CGColorSpaceCreateDeviceGray()
+            let bitmapInfo: CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
+                
+            let cgim = CGImage.init(width: texture.width, height: texture.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bitsPerPixel, bytesPerRow: bytesPerRow, space: grayColorSpace, bitmapInfo: bitmapInfo, provider: UIImage.dataProviderRefFrom(texture: texture), decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+
+            self.init(cgImage: cgim!)
+        }
     }
   
     static func dataProviderRefFrom(texture: MTLTexture) -> CGDataProvider {

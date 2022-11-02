@@ -18,8 +18,8 @@ class ARTextureContainer {
         // init target texture
         let texDescriptor = MTLTextureDescriptor()
         texDescriptor.textureType = .type2D
-        texDescriptor.width = 512
-        texDescriptor.height = 512
+        texDescriptor.width = 256
+        texDescriptor.height = 192
         texDescriptor.pixelFormat = .rgba8Unorm
         texDescriptor.usage = [.renderTarget, .shaderRead]
         // alternative code
@@ -54,7 +54,7 @@ class PipeSequenceRecorder {
         if let commandBuffer = commandQueue.makeCommandBuffer() {
             commandBuffer.label = "MyCommand"
 
-            var textures = [renderer.sourceTexture]
+            var textures = [arTextures.colorTexture]
             commandBuffer.addCompletedHandler { commandBuffer in
                 textures.removeAll()
             }
