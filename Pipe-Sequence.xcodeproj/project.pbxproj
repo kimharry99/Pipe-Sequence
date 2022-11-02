@@ -22,6 +22,7 @@
 		D882B75728F679C600CA9A05 /* PipeSequenceRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D882B75628F679C500CA9A05 /* PipeSequenceRecorder.swift */; };
 		D8E77A5828E59A3500A81F15 /* Plane.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E77A5728E59A3500A81F15 /* Plane.swift */; };
 		D8E77A5A28E5C95400A81F15 /* UIImageMetalExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */; };
+		D8E792962912019800FF2C92 /* UsefulFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E792952912019800FF2C92 /* UsefulFunctions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,7 @@
 		D882B75628F679C500CA9A05 /* PipeSequenceRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipeSequenceRecorder.swift; sourceTree = "<group>"; };
 		D8E77A5728E59A3500A81F15 /* Plane.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Plane.swift; sourceTree = "<group>"; };
 		D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageMetalExtensions.swift; sourceTree = "<group>"; };
+		D8E792952912019800FF2C92 /* UsefulFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsefulFunctions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 		D835852828E32380004C5325 /* Pipe-Sequence */ = {
 			isa = PBXGroup;
 			children = (
+				D8E792942912018300FF2C92 /* Helpers */,
 				D84F2FAA28EBEBB80076609E /* Pipe_Sequence-Bridging-Header.h */,
 				D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */,
 				D8E77A5728E59A3500A81F15 /* Plane.swift */,
@@ -145,6 +148,14 @@
 				D835854B28E32381004C5325 /* Pipe_SequenceUITestsLaunchTests.swift */,
 			);
 			path = "Pipe-SequenceUITests";
+			sourceTree = "<group>";
+		};
+		D8E792942912018300FF2C92 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				D8E792952912019800FF2C92 /* UsefulFunctions.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -280,6 +291,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D84F2FA728EBE10E0076609E /* Shaders.metal in Sources */,
+				D8E792962912019800FF2C92 /* UsefulFunctions.swift in Sources */,
 				D835852E28E32381004C5325 /* ViewController.swift in Sources */,
 				D882B75728F679C600CA9A05 /* PipeSequenceRecorder.swift in Sources */,
 				D8E77A5A28E5C95400A81F15 /* UIImageMetalExtensions.swift in Sources */,
