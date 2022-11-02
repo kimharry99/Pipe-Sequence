@@ -142,6 +142,7 @@ class TextureCreator {
     
     func updateARState() {
         guard let currentFrame = session.currentFrame else {
+            arTextures.valid = arTextures.valid && false
             return
         }
         // Create two textures (Y and CbCr) from the provided frame's captured image
@@ -208,6 +209,7 @@ class TextureCreator {
     
     func drawCapturedImage(renderEncoder: MTLRenderCommandEncoder) {
         guard let textureY = capturedImageTextureY, let textureCbCr = capturedImageTextureCbCr else {
+            arTextures.valid = arTextures.valid && false
             return
         }
 
@@ -234,6 +236,7 @@ class TextureCreator {
     
     func makeConfiTexture(){
         guard let confiTexture = cvConfiTexture else {
+            arTextures.valid = arTextures.valid && false
             return
         }
         arTextures.confiTexture = CVMetalTextureGetTexture(confiTexture)
