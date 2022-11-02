@@ -28,7 +28,8 @@ typedef enum VertexAttributes {
 typedef enum TextureIndices {
     kTextureIndexColor    = 0,
     kTextureIndexY        = 1,
-    kTextureIndexCbCr     = 2
+    kTextureIndexCbCr     = 2,
+    kTextureIndexDepth    = 3
 } TextureIndices;
 
 #endif /* ShaderTypes_h */

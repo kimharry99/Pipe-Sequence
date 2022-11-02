@@ -10,7 +10,7 @@ import ARKit
 
 class ARTextureContainer {
     var colorTexture: MTLTexture
-    var depthTexture: MTLTexture?
+    var depthTexture: MTLTexture
     var confiTexture: MTLTexture?
     var valid: Bool
     
@@ -25,6 +25,11 @@ class ARTextureContainer {
         // alternative code
         // texDescriptor.usage = MTLTextureUsage(rawValue: MTLTextureUsage.renderTarget.rawValue | MTLTextureUsage.shaderRead.rawValue)
         colorTexture = device.makeTexture(descriptor: texDescriptor)!
+
+        // initialize depth texture
+        texDescriptor.pixelFormat = .r16Uint
+        texDescriptor.usage = [.renderTarget, .shaderRead]
+        depthTexture = device.makeTexture(descriptor: texDescriptor)!
 
         valid = false
     }

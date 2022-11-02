@@ -57,7 +57,7 @@ class TextureCreator {
         if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
             
             drawCapturedImage(renderEncoder: renderEncoder)
-            makeDepthTexture()
+//            makeDepthTexture()
             makeConfiTexture()
             
             renderEncoder.endEncoding()
@@ -114,6 +114,11 @@ class TextureCreator {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(1, 1, 1, 1)
         renderPassDescriptor.colorAttachments[0].storeAction = .store
 
+        renderPassDescriptor.colorAttachments[1].texture = arTextures.depthTexture
+        renderPassDescriptor.colorAttachments[1].loadAction = .clear
+        renderPassDescriptor.colorAttachments[1].clearColor = MTLClearColorMake(0, 0, 0, 1)
+        renderPassDescriptor.colorAttachments[1].storeAction = .store
+
         // init RenderPipelineDescriptor
         let renderToTargetPipelineStateDescriptor = MTLRenderPipelineDescriptor()
         renderToTargetPipelineStateDescriptor.label = "MyRenderToTargetPipeline"
@@ -122,6 +127,7 @@ class TextureCreator {
         renderToTargetPipelineStateDescriptor.fragmentFunction = capturedImageFragmentFunction
         renderToTargetPipelineStateDescriptor.vertexDescriptor = imageVertexDescriptor
         renderToTargetPipelineStateDescriptor.colorAttachments[0].pixelFormat = arTextures.colorTexture.pixelFormat
+        renderToTargetPipelineStateDescriptor.colorAttachments[1].pixelFormat = arTextures.depthTexture.pixelFormat
         
         do {
             try renderToTargetPipelineState = device.makeRenderPipelineState(descriptor: renderToTargetPipelineStateDescriptor)
@@ -219,12 +225,12 @@ class TextureCreator {
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
     }
     
-    func makeDepthTexture(){
-        guard let depthTexture = cvDepthTexture else {
-            return
-        }
-        arTextures.depthTexture = CVMetalTextureGetTexture(depthTexture)
-    }
+//    func makeDepthTexture(){
+//        guard let depthTexture = cvDepthTexture else {
+//            return
+//        }
+//        arTextures.depthTexture = CVMetalTextureGetTexture(depthTexture)
+//    }
     
     func makeConfiTexture(){
         guard let confiTexture = cvConfiTexture else {

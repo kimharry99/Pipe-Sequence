@@ -22,6 +22,11 @@ typedef struct {
     float2 texCoord;
 } ImageColorInOut;
 
+typedef struct {
+    float4 rgbColor [[color(0)]];
+    uint16_t depth [[color(1)]];
+} FragmentOut;
+
 // Captured image vertex function
 vertex ImageColorInOut capturedImageVertexTransform(ImageVertex in [[stage_in]]) {
     ImageColorInOut out;
@@ -36,13 +41,13 @@ vertex ImageColorInOut capturedImageVertexTransform(ImageVertex in [[stage_in]])
 }
 
 // Captured image fragment function
-fragment float4 capturedImageFragmentShader(ImageColorInOut in [[stage_in]],
-                                            texture2d<float, access::sample> capturedImageTextureY [[ texture(kTextureIndexY) ]],
-                                            texture2d<float, access::sample> capturedImageTextureCbCr [[ texture(kTextureIndexCbCr) ]]) {
-
-    constexpr sampler colorSampler(mip_filter::linear,
-                                   mag_filter::linear,
-                                   min_filter::linear);
+fragment FragmentOut capturedImageFragmentShader(ImageColorInOut in [[stage_in]],
+                                                 texture2d<float, access::sample> capturedImageTextureY [[ texture(kTextureIndexY) ]],
+                                                 texture2d<float, access::sample> capturedImageTextureCbCr [[ texture(kTextureIndexCbCr) ]],
+                                                 depth2d<float, access::sample> depthMapTexture [[texture(kTextureIndexDepth)]]) {
+    FragmentOut out;
+    
+    constexpr sampler s(address::clamp_to_edge, filter::linear);
 
     const float4x4 ycbcrToRGBTransform = float4x4(
         float4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
@@ -52,9 +57,14 @@ fragment float4 capturedImageFragmentShader(ImageColorInOut in [[stage_in]],
     );
 
     // Sample Y and CbCr textures to get the YCbCr color at the given texture coordinate
-    float4 ycbcr = float4(capturedImageTextureY.sample(colorSampler, in.texCoord).r,
-                          capturedImageTextureCbCr.sample(colorSampler, in.texCoord).rg, 1.0);
+    float4 ycbcr = float4(capturedImageTextureY.sample(s, in.texCoord).r,
+                          capturedImageTextureCbCr.sample(s, in.texCoord).rg, 1.0);
 
-    // Return converted RGB color
-    return ycbcrToRGBTransform * ycbcr;
+    // Set converted RGB color
+    out.rgbColor = ycbcrToRGBTransform * ycbcr;
+    
+    // Set re-ranged depth value
+    float depth = depthMapTexture.sample(s, in.texCoord);
+    out.depth = depth / 5.0f * 65535u;
+    return out;
 }
