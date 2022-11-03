@@ -60,11 +60,12 @@ fragment FragmentOut capturedImageFragmentShader(ImageColorInOut in [[stage_in]]
     float4 ycbcr = float4(capturedImageTextureY.sample(s, in.texCoord).r,
                           capturedImageTextureCbCr.sample(s, in.texCoord).rg, 1.0);
 
-    // Set converted RGB color
-    out.rgbColor = ycbcrToRGBTransform * ycbcr;
+    // Set converted ARGB color
+    out.rgbColor = float4(1.0, (ycbcrToRGBTransform * ycbcr).rgb);
     
     // Set re-ranged depth value
     float depth = depthMapTexture.sample(s, in.texCoord);
-    out.depth = depth / 5.0f * 65535u;
+    out.depth = ((uint16_t) (depth * 65535.0f)) / 5u;
+//    out.depth = 1000;
     return out;
 }

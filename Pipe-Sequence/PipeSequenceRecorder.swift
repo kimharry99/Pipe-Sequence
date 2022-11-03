@@ -62,7 +62,7 @@ class PipeSequenceRecorder {
             commandBuffer.label = "MyCommand"
 
             arTextures.valid = true
-            var textures = [arTextures.colorTexture, arTextures.depthTexture, arTextures.confiTexture!, arTextures.valid] as [Any]
+            var textures = [textureCreator.capturedImageTextureY, textureCreator.capturedImageTextureCbCr, textureCreator.cvDepthTexture, textureCreator.cvConfiTexture]
             commandBuffer.addCompletedHandler { [weak self] commandBuffer in
                 if let strongSelf = self {
                     strongSelf.dataRecorder.save()
