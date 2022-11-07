@@ -64,8 +64,9 @@ fragment FragmentOut capturedImageFragmentShader(ImageColorInOut in [[stage_in]]
     out.rgbColor = float4(1.0, (ycbcrToRGBTransform * ycbcr).rgb);
     
     // Set re-ranged depth value
-    float depth = depthMapTexture.sample(s, in.texCoord);
-    out.depth = ((uint16_t) (depth * 65535.0f)) / 5u;
-//    out.depth = 1000;
+    float depth = clamp(depthMapTexture.sample(s, in.texCoord), 0.0f, 5.0f) ;
+
+    // Re-scale depth value
+    out.depth = ((uint16_t) (depth * 13107.0f));
     return out;
 }

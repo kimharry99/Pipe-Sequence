@@ -24,7 +24,7 @@ class DataRecorder {
     
     // text directory
     var dirURLs = [URL]()
-    var dirNames: [String] = ["intrinsic", "pose", "color", "depth_txt"]
+    var dirNames: [String] = ["intrinsic", "pose", "color", "depth"]
     
     init(session: ARSession, arTextures: ARTextureContainer) {
         self.session = session

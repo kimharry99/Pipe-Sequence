@@ -155,6 +155,7 @@ class TextureCreator {
     // Creates two textures (Y and CbCr) to transfer the current frame's camera image to the GPU for rendering.
     func updateCapturedImageTextures(frame: ARFrame) {
         if CVPixelBufferGetPlaneCount(frame.capturedImage) < 2 {
+            arTextures.valid = arTextures.valid && false
             return
         }
         capturedImageTextureY = createTexture(fromPixelBuffer: frame.capturedImage, pixelFormat: .r8Unorm, planeIndex: 0)
@@ -177,6 +178,7 @@ class TextureCreator {
         // Get the scene depth or smoothed scene depth from the current frame.
         guard let sceneDepth = frame.sceneDepth else {
             print("Failed to acquire scene depth.")
+            arTextures.valid = arTextures.valid && false
             return
         }
         var pixelBuffer: CVPixelBuffer!
@@ -208,7 +210,7 @@ class TextureCreator {
     }
     
     func drawCapturedImage(renderEncoder: MTLRenderCommandEncoder) {
-        guard let textureY = capturedImageTextureY, let textureCbCr = capturedImageTextureCbCr else {
+        guard let textureY = capturedImageTextureY, let textureCbCr = capturedImageTextureCbCr, let textureDepth = cvDepthTexture else {
             arTextures.valid = arTextures.valid && false
             return
         }
@@ -222,17 +224,11 @@ class TextureCreator {
         // set fragment texture
         renderEncoder.setFragmentTexture(CVMetalTextureGetTexture(textureY), index: Int(kTextureIndexY.rawValue))
         renderEncoder.setFragmentTexture(CVMetalTextureGetTexture(textureCbCr), index: Int(kTextureIndexCbCr.rawValue))
+        renderEncoder.setFragmentTexture(CVMetalTextureGetTexture(textureDepth), index: Int(kTextureIndexDepth.rawValue))
         
         // call drawing primitive
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
     }
-    
-//    func makeDepthTexture(){
-//        guard let depthTexture = cvDepthTexture else {
-//            return
-//        }
-//        arTextures.depthTexture = CVMetalTextureGetTexture(depthTexture)
-//    }
     
     func makeConfiTexture(){
         guard let confiTexture = cvConfiTexture else {

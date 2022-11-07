@@ -49,7 +49,7 @@ public struct cgimData {
 }
 
 let rgbCGimData = cgimData(bitsPerComponent: 8, bitsPerPixel: 32, colorSpace: CGColorSpaceCreateDeviceRGB(), bitmapInfo: [.byteOrder32Big, CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)])
-let depthCGimData = cgimData(bitsPerComponent: 16, bitsPerPixel: 16, colorSpace: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue))
+let depthCGimData = cgimData(bitsPerComponent: 16, bitsPerPixel: 16, colorSpace: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder16Little.rawValue | CGImageAlphaInfo.none.rawValue))
 
 let cgImDataDict: [MTLPixelFormat:cgimData] = [.rgba8Unorm:rgbCGimData, .r16Uint:depthCGimData]
 
