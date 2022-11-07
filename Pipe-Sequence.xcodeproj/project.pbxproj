@@ -116,22 +116,15 @@
 		D835852828E32380004C5325 /* Pipe-Sequence */ = {
 			isa = PBXGroup;
 			children = (
+				D84CCF092919186400351EB7 /* Sources */,
 				D8E792942912018300FF2C92 /* Helpers */,
 				D84F2FAA28EBEBB80076609E /* Pipe_Sequence-Bridging-Header.h */,
-				D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */,
-				D8E77A5728E59A3500A81F15 /* Plane.swift */,
 				D835852928E32381004C5325 /* AppDelegate.swift */,
 				D835852B28E32381004C5325 /* art.scnassets */,
 				D835852D28E32381004C5325 /* ViewController.swift */,
 				D835852F28E32381004C5325 /* Main.storyboard */,
 				D835853228E32381004C5325 /* Assets.xcassets */,
 				D835853428E32381004C5325 /* LaunchScreen.storyboard */,
-				D84F2FA428EBC5E50076609E /* Renderer.swift */,
-				D84F2FA628EBE10E0076609E /* Shaders.metal */,
-				D84F2FA828EBE4000076609E /* ShaderTypes.h */,
-				D882B75428F5569600CA9A05 /* TextureCreator.swift */,
-				D882B75628F679C500CA9A05 /* PipeSequenceRecorder.swift */,
-				D8E79297291274BC00FF2C92 /* DataRecorder.swift */,
 			);
 			path = "Pipe-Sequence";
 			sourceTree = "<group>";
@@ -151,6 +144,21 @@
 				D835854B28E32381004C5325 /* Pipe_SequenceUITestsLaunchTests.swift */,
 			);
 			path = "Pipe-SequenceUITests";
+			sourceTree = "<group>";
+		};
+		D84CCF092919186400351EB7 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				D8E77A5928E5C95400A81F15 /* UIImageMetalExtensions.swift */,
+				D8E77A5728E59A3500A81F15 /* Plane.swift */,
+				D84F2FA428EBC5E50076609E /* Renderer.swift */,
+				D882B75428F5569600CA9A05 /* TextureCreator.swift */,
+				D882B75628F679C500CA9A05 /* PipeSequenceRecorder.swift */,
+				D8E79297291274BC00FF2C92 /* DataRecorder.swift */,
+				D84F2FA628EBE10E0076609E /* Shaders.metal */,
+				D84F2FA828EBE4000076609E /* ShaderTypes.h */,
+			);
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		D8E792942912018300FF2C92 /* Helpers */ = {
