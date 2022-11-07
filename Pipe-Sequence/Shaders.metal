@@ -70,3 +70,15 @@ fragment FragmentOut capturedImageFragmentShader(ImageColorInOut in [[stage_in]]
     out.depth = ((uint16_t) (depth * 13107.0f));
     return out;
 }
+
+fragment float4 renderTextureFragmentShader(ImageColorInOut in [[stage_in]],
+                                            texture2d<float, access::sample> capturedImageTextureARGB [[texture(kTextureIndexColor)]]) {
+
+    constexpr sampler colorSampler(mip_filter::linear,
+                                   mag_filter::linear,
+                                   min_filter::linear);
+    
+    float4 argb = capturedImageTextureARGB.sample(colorSampler, in.texCoord);
+
+    return float4(argb.yzw, argb.x);
+}

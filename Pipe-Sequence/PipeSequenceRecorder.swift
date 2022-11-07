@@ -47,7 +47,7 @@ class PipeSequenceRecorder {
     init(session: ARSession, device: MTLDevice, renderDestination: RenderDestinationProvider){
         self.arTextures = ARTextureContainer(device: device)
         self.textureCreator = TextureCreator(session: session, device: device, arTextures: arTextures)
-        self.renderer = Renderer(session: session, device: device, renderDestination: renderDestination)
+        self.renderer = Renderer(session: session, device: device, renderDestination: renderDestination, arTextures: arTextures)
         self.dataRecorder = DataRecorder(session: session, arTextures: arTextures)
 
         // set capture image texture to renderer as source texture
@@ -72,7 +72,7 @@ class PipeSequenceRecorder {
             // create MTLTexture from captured image from ARSession
             textureCreator.create(commandBuffer: commandBuffer)
             // render source texture to main view
-//            renderer.update()
+            renderer.update(commandBuffer: commandBuffer)
             
             commandBuffer.commit()
         }
