@@ -41,11 +41,10 @@ vertex ImageColorInOut capturedImageVertexTransform(ImageVertex in [[stage_in]])
 }
 
 // Captured image fragment function
-fragment FragmentOut capturedImageFragmentShader(ImageColorInOut in [[stage_in]],
+fragment float4 capturedImageFragmentShader(ImageColorInOut in [[stage_in]],
                                                  texture2d<float, access::sample> capturedImageTextureY [[ texture(kTextureIndexY) ]],
-                                                 texture2d<float, access::sample> capturedImageTextureCbCr [[ texture(kTextureIndexCbCr) ]],
-                                                 depth2d<float, access::sample> depthMapTexture [[texture(kTextureIndexDepth)]]) {
-    FragmentOut out;
+                                                 texture2d<float, access::sample> capturedImageTextureCbCr [[ texture(kTextureIndexCbCr) ]]) {
+    float4 out;
     
     constexpr sampler s(address::clamp_to_edge, filter::linear);
 
@@ -61,13 +60,14 @@ fragment FragmentOut capturedImageFragmentShader(ImageColorInOut in [[stage_in]]
                           capturedImageTextureCbCr.sample(s, in.texCoord).rg, 1.0);
 
     // Set converted ARGB color
-    out.rgbColor = float4(1.0, (ycbcrToRGBTransform * ycbcr).rgb);
+//    out.rgbColor = float4(1.0, (ycbcrToRGBTransform * ycbcr).rgb);
+    out = float4(1.0, (ycbcrToRGBTransform * ycbcr).rgb);
     
     // Set re-ranged depth value
-    float depth = clamp(depthMapTexture.sample(s, in.texCoord), 0.0f, 5.0f) ;
-
-    // Re-scale depth value
-    out.depth = ((uint16_t) (depth * 13107.0f));
+//    float depth = clamp(depthMapTexture.sample(s, in.texCoord), 0.0f, 5.0f) ;
+//
+//    // Re-scale depth value
+//    out.depth = ((uint16_t) (depth * 13107.0f));
     return out;
 }
 

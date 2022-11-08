@@ -10,8 +10,9 @@ import ARKit
 
 class ARTextureContainer {
     var colorTexture: MTLTexture
-    var depthTexture: MTLTexture
+    var rawDepthTexture: MTLTexture?
     var confiTexture: MTLTexture?
+    var depthTexture: MTLTexture
     var valid: Bool
     
     init(device: MTLDevice) {

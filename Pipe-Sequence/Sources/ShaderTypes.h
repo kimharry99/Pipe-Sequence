@@ -29,7 +29,8 @@ typedef enum TextureIndices {
     kTextureIndexColor    = 0,
     kTextureIndexY        = 1,
     kTextureIndexCbCr     = 2,
-    kTextureIndexDepth    = 3
+    kTextureIndexDepth    = 3,
+    kTextureIndexDepthFiltered = 4
 } TextureIndices;
 
 #endif /* ShaderTypes_h */
