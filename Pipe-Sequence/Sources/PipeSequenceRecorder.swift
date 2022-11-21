@@ -39,6 +39,7 @@ class ARTextureContainer {
 class PipeSequenceRecorder {
     var textureCreator: TextureCreator
     var renderer: Renderer
+    var filterer: Filterer
     var dataRecorder: DataRecorder
     
     let commandQueue: MTLCommandQueue!
@@ -49,6 +50,7 @@ class PipeSequenceRecorder {
         self.arTextures = ARTextureContainer(device: device)
         self.textureCreator = TextureCreator(session: session, device: device, arTextures: arTextures)
         self.renderer = Renderer(session: session, device: device, renderDestination: renderDestination, arTextures: arTextures)
+        self.filterer = Filterer(device: device, arTextures: arTextures)
         self.dataRecorder = DataRecorder(session: session, arTextures: arTextures)
 
         // set capture image texture to renderer as source texture
@@ -72,6 +74,8 @@ class PipeSequenceRecorder {
             }
             // create MTLTexture from captured image from ARSession
             textureCreator.create(commandBuffer: commandBuffer)
+            // filter depth data with confidence
+            filterer.filter(commandBuffer: commandBuffer)
             // render source texture to main view
             renderer.update(commandBuffer: commandBuffer)
             

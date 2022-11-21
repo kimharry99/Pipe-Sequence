@@ -82,3 +82,24 @@ fragment float4 renderTextureFragmentShader(ImageColorInOut in [[stage_in]],
 
     return float4(argb.yzw, argb.x);
 }
+
+fragment uint16_t filterDepthFragmentShader(ImageColorInOut in [[stage_in]],
+depth2d<float, access::sample> rawDepthTexture [[texture(kTextureIndexRawDepth)]],
+texture2d<uint> arDepthConfidence [[ texture(kTextureIndexConfidence) ]])
+{
+    const uint minConfidence = 1;
+
+    // Create an object to sample textures.
+    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    
+    float depth = rawDepthTexture.sample(s, in.texCoord);
+    
+    uint confidence = arDepthConfidence.sample(s, in.texCoord).x;
+    if (confidence < minConfidence) {
+        depth = 0.0f;
+    }
+    
+    uint16_t outDepth = ((uint16_t) (depth * 13107.0f));
+    
+    return outDepth;
+}
