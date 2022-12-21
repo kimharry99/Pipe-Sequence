@@ -49,7 +49,8 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-        configuration.frameSemantics = .sceneDepth
+        configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
+        configuration.isAutoFocusEnabled = false
         
         // Run the view's session
         session.run(configuration)

@@ -32,9 +32,6 @@ class TextureCreator {
     var cvDepthTexture: CVMetalTexture?
     var cvConfiTexture: CVMetalTexture?
     var imagePlaneVertexBuffer: MTLBuffer!
-    
-    // Result Texture
-//    var renderResultTexture: MTLTexture!
 
     // Source Image Texture Cache
     var sourceTextureCache: CVMetalTextureCache!
@@ -93,18 +90,6 @@ class TextureCreator {
         imageVertexDescriptor.layouts[0].stride = 16
         imageVertexDescriptor.layouts[0].stepRate = 1
         imageVertexDescriptor.layouts[0].stepFunction = .perVertex
-
-        // init target texture
-//        let texDescriptor = MTLTextureDescriptor()
-//        texDescriptor.textureType = .type2D
-//        texDescriptor.width = 512
-//        texDescriptor.height = 512
-//        texDescriptor.pixelFormat = .rgba8Unorm
-//        texDescriptor.usage = [.renderTarget, .shaderRead]
-        // alternative code
-        // texDescriptor.usage = MTLTextureUsage(rawValue: MTLTextureUsage.renderTarget.rawValue | MTLTextureUsage.shaderRead.rawValue)
-
-//        renderResultTexture = device.makeTexture(descriptor: texDescriptor)!
         
         // init renderPassDescriptor
         renderPassDescriptor = MTLRenderPassDescriptor()
@@ -112,11 +97,6 @@ class TextureCreator {
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(1, 1, 1, 1)
         renderPassDescriptor.colorAttachments[0].storeAction = .store
-
-//        renderPassDescriptor.colorAttachments[1].texture = arTextures.depthTexture
-//        renderPassDescriptor.colorAttachments[1].loadAction = .clear
-//        renderPassDescriptor.colorAttachments[1].clearColor = MTLClearColorMake(0, 0, 0, 1)
-//        renderPassDescriptor.colorAttachments[1].storeAction = .store
 
         // init RenderPipelineDescriptor
         let renderToTargetPipelineStateDescriptor = MTLRenderPipelineDescriptor()
@@ -126,7 +106,6 @@ class TextureCreator {
         renderToTargetPipelineStateDescriptor.fragmentFunction = capturedImageFragmentFunction
         renderToTargetPipelineStateDescriptor.vertexDescriptor = imageVertexDescriptor
         renderToTargetPipelineStateDescriptor.colorAttachments[0].pixelFormat = arTextures.colorTexture.pixelFormat
-//        renderToTargetPipelineStateDescriptor.colorAttachments[1].pixelFormat = arTextures.depthTexture.pixelFormat
         
         do {
             try renderToTargetPipelineState = device.makeRenderPipelineState(descriptor: renderToTargetPipelineStateDescriptor)
@@ -175,7 +154,7 @@ class TextureCreator {
     // Prepares the scene depth information for transfer to the GPU for rendering.
     func updateARDepthTexures(frame: ARFrame) {
         // Get the scene depth or smoothed scene depth from the current frame.
-        guard let sceneDepth = frame.sceneDepth else {
+        guard let sceneDepth = frame.smoothedSceneDepth else {
             print("Failed to acquire scene depth.")
             arTextures.valid = arTextures.valid && false
             return

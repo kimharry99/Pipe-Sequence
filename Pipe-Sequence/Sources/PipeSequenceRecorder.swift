@@ -14,13 +14,13 @@ class ARTextureContainer {
     var confiTexture: MTLTexture?
     var depthTexture: MTLTexture
     var valid: Bool
-    
+
     init(device: MTLDevice) {
         // init target texture
         let texDescriptor = MTLTextureDescriptor()
         texDescriptor.textureType = .type2D
-        texDescriptor.width = 256
-        texDescriptor.height = 192
+        texDescriptor.width = 512
+        texDescriptor.height = 384
         texDescriptor.pixelFormat = .rgba8Unorm
         texDescriptor.usage = [.renderTarget, .shaderRead]
         // alternative code
@@ -28,6 +28,8 @@ class ARTextureContainer {
         colorTexture = device.makeTexture(descriptor: texDescriptor)!
 
         // initialize depth texture
+        texDescriptor.width = 256
+        texDescriptor.height = 192
         texDescriptor.pixelFormat = .r16Uint
         texDescriptor.usage = [.renderTarget, .shaderRead]
         depthTexture = device.makeTexture(descriptor: texDescriptor)!
@@ -52,9 +54,6 @@ class PipeSequenceRecorder {
         self.renderer = Renderer(session: session, device: device, renderDestination: renderDestination, arTextures: arTextures)
         self.filterer = Filterer(device: device, arTextures: arTextures)
         self.dataRecorder = DataRecorder(session: session, arTextures: arTextures)
-
-        // set capture image texture to renderer as source texture
-        // renderer.sourceTexture = textureCreator.renderResultTexture
         
         // init metal objects
         commandQueue = device.makeCommandQueue()
