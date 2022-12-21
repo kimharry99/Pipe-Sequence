@@ -13,7 +13,8 @@ class Filterer {
     let device: MTLDevice
     let arTextures: ARTextureContainer
     
-    var renderPassDescriptor: MTLRenderPassDescriptor!
+    var depthRenderPassDescriptor: MTLRenderPassDescriptor!
+    var smoothRenderPassDescriptor: MTLRenderPassDescriptor!
     var renderPipelineState: MTLRenderPipelineState!
     var imagePlaneVertexBuffer: MTLBuffer!
     
@@ -33,9 +34,15 @@ class Filterer {
     
     func filter(commandBuffer: MTLCommandBuffer) {
         // 렌더링
-        if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
+        if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: depthRenderPassDescriptor) {
             
-            filterWithInfo(renderEncoder: renderEncoder)
+            filterWithInfo(renderEncoder: renderEncoder, rawDepthTexture: arTextures.rawDepthTexture, confiTexture: arTextures.confiTexture)
+            
+            renderEncoder.endEncoding()
+        }
+        if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: smoothRenderPassDescriptor) {
+            
+            filterWithInfo(renderEncoder: renderEncoder, rawDepthTexture: arTextures.rawSmoothDepthTexture, confiTexture: arTextures.smoothConfiTexture)
             
             renderEncoder.endEncoding()
         }
@@ -66,10 +73,15 @@ class Filterer {
         imageVertexDescriptor.attributes[1].offset = 8
         imageVertexDescriptor.attributes[0].bufferIndex = Int(kBufferIndexMeshPositions.rawValue)
         
-        renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0].texture = arTextures.depthTexture
-        renderPassDescriptor.colorAttachments[0].loadAction = .clear
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
+        depthRenderPassDescriptor = MTLRenderPassDescriptor()
+        depthRenderPassDescriptor.colorAttachments[0].texture = arTextures.depthTexture
+        depthRenderPassDescriptor.colorAttachments[0].loadAction = .clear
+        depthRenderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
+
+        smoothRenderPassDescriptor = MTLRenderPassDescriptor()
+        smoothRenderPassDescriptor.colorAttachments[0].texture = arTextures.smoothDepthTexture
+        smoothRenderPassDescriptor.colorAttachments[0].loadAction = .clear
+        smoothRenderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
         
         // Buffer layout
         imageVertexDescriptor.layouts[0].stride = 16
@@ -91,13 +103,13 @@ class Filterer {
         }
     }
     
-    func filterWithInfo(renderEncoder: MTLRenderCommandEncoder) {
+    func filterWithInfo(renderEncoder: MTLRenderCommandEncoder, rawDepthTexture: MTLTexture?, confiTexture: MTLTexture?) {
         renderEncoder.label = "Depth Filtering Render Pass"
         renderEncoder.setCullMode(.none)
         renderEncoder.setRenderPipelineState(renderPipelineState)
         renderEncoder.setVertexBuffer(imagePlaneVertexBuffer, offset: 0, index: Int(kBufferIndexMeshPositions.rawValue))
-        renderEncoder.setFragmentTexture(arTextures.rawDepthTexture, index: Int(kTextureIndexRawDepth.rawValue))
-        renderEncoder.setFragmentTexture(arTextures.confiTexture, index: Int(kTextureIndexConfidence.rawValue))
+        renderEncoder.setFragmentTexture(rawDepthTexture, index: Int(kTextureIndexRawDepth.rawValue))
+        renderEncoder.setFragmentTexture(confiTexture, index: Int(kTextureIndexConfidence.rawValue))
 
         // call drawing primitive
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)

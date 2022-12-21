@@ -11,8 +11,11 @@ import ARKit
 class ARTextureContainer {
     var colorTexture: MTLTexture
     var rawDepthTexture: MTLTexture?
+    var rawSmoothDepthTexture: MTLTexture?
     var confiTexture: MTLTexture?
+    var smoothConfiTexture: MTLTexture?
     var depthTexture: MTLTexture
+    var smoothDepthTexture: MTLTexture
     var valid: Bool
 
     init(device: MTLDevice) {
@@ -33,6 +36,7 @@ class ARTextureContainer {
         texDescriptor.pixelFormat = .r16Uint
         texDescriptor.usage = [.renderTarget, .shaderRead]
         depthTexture = device.makeTexture(descriptor: texDescriptor)!
+        smoothDepthTexture = device.makeTexture(descriptor: texDescriptor)!
 
         valid = false
     }
@@ -64,7 +68,7 @@ class PipeSequenceRecorder {
             commandBuffer.label = "MyCommand"
 
             arTextures.valid = true
-            var textures = [textureCreator.capturedImageTextureY, textureCreator.capturedImageTextureCbCr, textureCreator.cvDepthTexture, textureCreator.cvConfiTexture]
+            var textures = [textureCreator.capturedImageTextureY, textureCreator.capturedImageTextureCbCr, textureCreator.cvDepthTexture, textureCreator.cvConfiTexture, textureCreator.cvSmoothDepthTexture, textureCreator.cvSmoothConfiTexture]
             commandBuffer.addCompletedHandler { [weak self] commandBuffer in
                 if let strongSelf = self {
                     strongSelf.dataRecorder.save()
