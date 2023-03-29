@@ -22,8 +22,8 @@ class ARTextureContainer {
         // init target texture
         let texDescriptor = MTLTextureDescriptor()
         texDescriptor.textureType = .type2D
-        texDescriptor.width = 512
-        texDescriptor.height = 384
+        texDescriptor.width = 640
+        texDescriptor.height = 480
         texDescriptor.pixelFormat = .rgba8Unorm
         texDescriptor.usage = [.renderTarget, .shaderRead]
         // alternative code

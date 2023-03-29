@@ -32,6 +32,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
         }
         // start recording
         else {
+            initArSession()
             self.pipeSequenceRecorder.startRecording()
             startRecordingButton.setTitle("Recording End", for: .normal)
         }
