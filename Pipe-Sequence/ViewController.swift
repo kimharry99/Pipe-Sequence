@@ -16,10 +16,35 @@ extension MTKView: RenderDestinationProvider {
 
 class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
+    @IBOutlet weak var startRecordingButton: UIButton!
+
     var session: ARSession!
     var pipeSequenceRecorder: PipeSequenceRecorder!
     var renderer: Renderer!
     var textureCreator: TextureCreator!
+
+    @IBAction func pressStartFusion(_ sender: UIButton)
+    {
+        if pipeSequenceRecorder.getIsRecording() {
+            self.pipeSequenceRecorder.endRecording()
+            startRecordingButton.setTitle("Recording Start", for: .normal)
+        }
+        else {
+            self.pipeSequenceRecorder.startRecording()
+            startRecordingButton.setTitle("Recording End", for: .normal)
+        }
+    }
+
+    func initArSession(){
+        // Create a session configuration
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
+        configuration.worldAlignment = .gravity
+        configuration.isAutoFocusEnabled = false
+        
+        // Run the view's session
+        session.run(configuration)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,14 +71,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
-        configuration.isAutoFocusEnabled = false
-        
-        // Run the view's session
-        session.run(configuration)
+        initArSession()
     }
     
     override func viewDidDisappear(_ animated: Bool) {

@@ -21,10 +21,16 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Recording Start"/>
+                                <connections>
+                                    <action selector="pressStartFusion:" destination="BV1-FR-VrT" eventType="touchUpInside" id="aE2-TK-zBo"/>
+                                </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="fQZ-KI-GVf"/>
                     </view>
+                    <connections>
+                        <outlet property="startRecordingButton" destination="Rnv-ps-ufo" id="GRK-m9-owf"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
             </objects>

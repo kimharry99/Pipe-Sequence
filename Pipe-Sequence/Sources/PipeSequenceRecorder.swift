@@ -51,6 +51,9 @@ class PipeSequenceRecorder {
     let commandQueue: MTLCommandQueue!
     
     let arTextures: ARTextureContainer
+
+    private var isRecording: Bool = false
+    open func getIsRecording() -> Bool {return isRecording}
     
     init(session: ARSession, device: MTLDevice, renderDestination: RenderDestinationProvider){
         self.arTextures = ARTextureContainer(device: device)
@@ -61,6 +64,14 @@ class PipeSequenceRecorder {
         
         // init metal objects
         commandQueue = device.makeCommandQueue()
+    }
+    
+    func endRecording(){
+        self.isRecording = false
+    }
+
+    func startRecording(){
+        self.isRecording = true
     }
     
     func update() {
