@@ -30,8 +30,6 @@ class DataRecorder {
     init(session: ARSession, arTextures: ARTextureContainer) {
         self.session = session
         self.arTextures = arTextures
-        
-        createFiles()
     }
     
     func save(){
@@ -58,7 +56,6 @@ class DataRecorder {
         }
     }
     
-    // MARK: - Private
     func createFiles()
     {
         // initialize file handlers
@@ -122,6 +119,7 @@ class DataRecorder {
         print("file creation complete!")
     }
 
+    // MARK: - Private
     func saveColorImage(frame: ARFrame) {
         let nTimestamp = frame.timestamp * self.mulSecondToNanoSecond
         // save rgb images

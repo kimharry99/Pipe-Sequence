@@ -71,6 +71,7 @@ class PipeSequenceRecorder {
     }
 
     func startRecording(){
+        self.dataRecorder.createFiles()
         self.isRecording = true
     }
     
@@ -82,7 +83,9 @@ class PipeSequenceRecorder {
             var textures = [textureCreator.capturedImageTextureY, textureCreator.capturedImageTextureCbCr, textureCreator.cvDepthTexture, textureCreator.cvConfiTexture, textureCreator.cvSmoothDepthTexture, textureCreator.cvSmoothConfiTexture]
             commandBuffer.addCompletedHandler { [weak self] commandBuffer in
                 if let strongSelf = self {
-                    strongSelf.dataRecorder.save()
+                    if strongSelf.getIsRecording() {
+                        strongSelf.dataRecorder.save()
+                    }
                 }
                 textures.removeAll()
             }

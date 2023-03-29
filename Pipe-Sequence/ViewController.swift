@@ -25,10 +25,12 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
 
     @IBAction func pressStartFusion(_ sender: UIButton)
     {
+        // end recording
         if pipeSequenceRecorder.getIsRecording() {
             self.pipeSequenceRecorder.endRecording()
             startRecordingButton.setTitle("Recording Start", for: .normal)
         }
+        // start recording
         else {
             self.pipeSequenceRecorder.startRecording()
             startRecordingButton.setTitle("Recording End", for: .normal)
