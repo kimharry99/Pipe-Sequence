@@ -220,6 +220,6 @@ class TextureCreator {
             arTextures.valid = arTextures.valid && false
             return
         }
-        arTextures.confiTexture = CVMetalTextureGetTexture(confiTexture)
+        arTextures.rawConfiTexture = CVMetalTextureGetTexture(confiTexture)
     }
 }

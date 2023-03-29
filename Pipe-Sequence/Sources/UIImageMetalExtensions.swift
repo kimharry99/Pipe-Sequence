@@ -50,8 +50,9 @@ public struct cgimData {
 
 let rgbCGimData = cgimData(bitsPerComponent: 8, bitsPerPixel: 32, colorSpace: CGColorSpaceCreateDeviceRGB(), bitmapInfo: [.byteOrder32Big, CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)])
 let depthCGimData = cgimData(bitsPerComponent: 16, bitsPerPixel: 16, colorSpace: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder16Little.rawValue | CGImageAlphaInfo.none.rawValue))
+let confidenceCGimData = cgimData(bitsPerComponent: 8, bitsPerPixel: 8, colorSpace: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue))
 
-let cgImDataDict: [MTLPixelFormat:cgimData] = [.rgba8Unorm:rgbCGimData, .r16Uint:depthCGimData]
+let cgImDataDict: [MTLPixelFormat:cgimData] = [.rgba8Unorm:rgbCGimData, .r16Uint:depthCGimData, .r8Uint:confidenceCGimData]
 
 extension UIImage {
     convenience init(texture: MTLTexture) {
@@ -61,7 +62,11 @@ extension UIImage {
         let colorSpace = cgImDataDict[texture.pixelFormat]!.colorSpace
         let bitmapInfo: CGBitmapInfo = cgImDataDict[texture.pixelFormat]!.bitmapInfo
 
-        let cgim = CGImage.init(width: texture.width, height: texture.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bitsPerPixel, bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: bitmapInfo, provider: UIImage.dataProviderRefFrom(texture: texture), decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        let width = texture.width
+        let height = texture.height
+        let provider = UIImage.dataProviderRefFrom(texture: texture)
+
+        let cgim = CGImage.init(width: width, height: height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bitsPerPixel, bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
         self.init(cgImage: cgim!)
     }
   
@@ -72,6 +77,12 @@ extension UIImage {
             var imageBytes = [UInt8](repeating: 0, count: pixelCount * 4)
             texture.getBytes(&imageBytes, bytesPerRow: 4 * texture.width, from: region, mipmapLevel: 0)
             let providerRef = CGDataProvider(data: NSData(bytes: &imageBytes, length: pixelCount * 4 * MemoryLayout<UInt8>.size))
+            return providerRef!
+        }
+        else if texture.pixelFormat == .r8Uint {
+            var imageBytes = [UInt8](repeating: 0, count: pixelCount * 1)
+            texture.getBytes(&imageBytes, bytesPerRow: 1 * texture.width, from: region, mipmapLevel: 0)
+            let providerRef = CGDataProvider(data: NSData(bytes: &imageBytes, length: pixelCount * 1 * MemoryLayout<UInt8>.size))
             return providerRef!
         }
         else {

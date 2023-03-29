@@ -36,7 +36,7 @@ class Filterer {
         // 렌더링
         if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: depthRenderPassDescriptor) {
             
-            filterWithInfo(renderEncoder: renderEncoder, rawDepthTexture: arTextures.rawDepthTexture, confiTexture: arTextures.confiTexture)
+            filterWithInfo(renderEncoder: renderEncoder, rawDepthTexture: arTextures.rawDepthTexture, rawConfiTexture: arTextures.rawConfiTexture)
             
             renderEncoder.endEncoding()
         }
@@ -92,13 +92,13 @@ class Filterer {
         }
     }
     
-    func filterWithInfo(renderEncoder: MTLRenderCommandEncoder, rawDepthTexture: MTLTexture?, confiTexture: MTLTexture?) {
+    func filterWithInfo(renderEncoder: MTLRenderCommandEncoder, rawDepthTexture: MTLTexture?, rawConfiTexture: MTLTexture?) {
         renderEncoder.label = "Depth Filtering Render Pass"
         renderEncoder.setCullMode(.none)
         renderEncoder.setRenderPipelineState(renderPipelineState)
         renderEncoder.setVertexBuffer(imagePlaneVertexBuffer, offset: 0, index: Int(kBufferIndexMeshPositions.rawValue))
         renderEncoder.setFragmentTexture(rawDepthTexture, index: Int(kTextureIndexRawDepth.rawValue))
-        renderEncoder.setFragmentTexture(confiTexture, index: Int(kTextureIndexConfidence.rawValue))
+        renderEncoder.setFragmentTexture(rawConfiTexture, index: Int(kTextureIndexConfidence.rawValue))
 
         // call drawing primitive
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)

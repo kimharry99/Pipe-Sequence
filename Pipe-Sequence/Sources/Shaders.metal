@@ -87,7 +87,7 @@ fragment uint16_t filterDepthFragmentShader(ImageColorInOut in [[stage_in]],
 depth2d<float, access::sample> rawDepthTexture [[texture(kTextureIndexRawDepth)]],
 texture2d<uint> arDepthConfidence [[ texture(kTextureIndexConfidence) ]])
 {
-    const uint minConfidence = 2;
+    const uint minConfidence = 0;
 
     // Create an object to sample textures.
     constexpr sampler s(address::clamp_to_edge, filter::linear);

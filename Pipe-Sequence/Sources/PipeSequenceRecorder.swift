@@ -11,8 +11,7 @@ import ARKit
 class ARTextureContainer {
     var colorTexture: MTLTexture
     var rawDepthTexture: MTLTexture?
-    var confiTexture: MTLTexture?
-    var smoothConfiTexture: MTLTexture?
+    var rawConfiTexture: MTLTexture?
     var depthTexture: MTLTexture
     var valid: Bool
 

@@ -16,15 +16,16 @@ class DataRecorder {
     var isCalibrated = false
     // constants for collecting data
     let mulSecondToNanoSecond: Double = 1000000000
-    let numDirs = 4
+    let numDirs = 5
     let DIR_INTRINSC = 0
     let DIR_CAMERA_POSE = 1
     let DIR_RGB_IMAGE = 2
     let DIR_DEPTH_IMAGE = 3
+    let DIR_CONFIDENCE_MAP = 4
     
     // text directory
     var dirURLs = [URL]()
-    var dirNames: [String] = ["intrinsic", "pose", "color", "depth"]
+    var dirNames: [String] = ["intrinsic", "pose", "color", "depth", "confidence"]
     
     init(session: ARSession, arTextures: ARTextureContainer) {
         self.session = session
@@ -48,6 +49,8 @@ class DataRecorder {
             self.saveColorImage(frame: currentFrame)
             // depth image save
             self.saveDepthImage(frame: currentFrame)
+            // confidence map save
+            self.saveConfidenceMap(frame: currentFrame)
             // camera pose save
             self.saveCameraPose(frame: currentFrame)
         }
@@ -133,6 +136,18 @@ class DataRecorder {
         var url = self.dirURLs[self.DIR_DEPTH_IMAGE]
         url.appendPathComponent(String(format: "%.0f.png", nTimestamp))
         try? pngImage?.write(to: url)
+    }
+
+    func saveConfidenceMap(frame: ARFrame) {
+        let nTimestamp = frame.timestamp * self.mulSecondToNanoSecond
+        // save image
+        if let confiTexture = arTextures.rawConfiTexture {
+            let debugPixelFormat = confiTexture.pixelFormat
+            let pngImage = UIImage(texture: confiTexture).pngData()
+            var url = self.dirURLs[self.DIR_CONFIDENCE_MAP]
+            url.appendPathComponent(String(format: "%.0f.png", nTimestamp))
+            try? pngImage?.write(to: url)
+        }
     }
 
     func saveCameraPose(frame: ARFrame) {
