@@ -40,12 +40,6 @@ class Filterer {
             
             renderEncoder.endEncoding()
         }
-        if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: smoothRenderPassDescriptor) {
-            
-            filterWithInfo(renderEncoder: renderEncoder, rawDepthTexture: arTextures.rawSmoothDepthTexture, confiTexture: arTextures.smoothConfiTexture)
-            
-            renderEncoder.endEncoding()
-        }
         return
     }
     
@@ -77,11 +71,6 @@ class Filterer {
         depthRenderPassDescriptor.colorAttachments[0].texture = arTextures.depthTexture
         depthRenderPassDescriptor.colorAttachments[0].loadAction = .clear
         depthRenderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
-
-        smoothRenderPassDescriptor = MTLRenderPassDescriptor()
-        smoothRenderPassDescriptor.colorAttachments[0].texture = arTextures.smoothDepthTexture
-        smoothRenderPassDescriptor.colorAttachments[0].loadAction = .clear
-        smoothRenderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
         
         // Buffer layout
         imageVertexDescriptor.layouts[0].stride = 16

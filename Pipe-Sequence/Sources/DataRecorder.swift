@@ -16,16 +16,15 @@ class DataRecorder {
     var isCalibrated = false
     // constants for collecting data
     let mulSecondToNanoSecond: Double = 1000000000
-    let numDirs = 5
+    let numDirs = 4
     let DIR_INTRINSC = 0
     let DIR_CAMERA_POSE = 1
     let DIR_RGB_IMAGE = 2
     let DIR_DEPTH_IMAGE = 3
-    let DIR_SMOOTH_DEPTH_IMAGE = 4
     
     // text directory
     var dirURLs = [URL]()
-    var dirNames: [String] = ["intrinsic", "pose", "color", "depth", "smooth"]
+    var dirNames: [String] = ["intrinsic", "pose", "color", "depth"]
     
     init(session: ARSession, arTextures: ARTextureContainer) {
         self.session = session
@@ -49,8 +48,6 @@ class DataRecorder {
             self.saveColorImage(frame: currentFrame)
             // depth image save
             self.saveDepthImage(frame: currentFrame)
-            // save smooth depth image
-            self.saveSmoothDepthImage(frame: currentFrame)
             // camera pose save
             self.saveCameraPose(frame: currentFrame)
         }
@@ -134,15 +131,6 @@ class DataRecorder {
         // save image
         let pngImage = UIImage(texture: arTextures.depthTexture).pngData()
         var url = self.dirURLs[self.DIR_DEPTH_IMAGE]
-        url.appendPathComponent(String(format: "%.0f.png", nTimestamp))
-        try? pngImage?.write(to: url)
-    }
-
-    func saveSmoothDepthImage(frame: ARFrame) {
-        let nTimestamp = frame.timestamp * self.mulSecondToNanoSecond
-        // save image
-        let pngImage = UIImage(texture: arTextures.smoothDepthTexture).pngData()
-        var url = self.dirURLs[self.DIR_SMOOTH_DEPTH_IMAGE]
         url.appendPathComponent(String(format: "%.0f.png", nTimestamp))
         try? pngImage?.write(to: url)
     }

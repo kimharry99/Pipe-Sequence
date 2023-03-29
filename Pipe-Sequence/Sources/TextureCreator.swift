@@ -31,8 +31,6 @@ class TextureCreator {
     var capturedImageTextureCbCr: CVMetalTexture?
     var cvDepthTexture: CVMetalTexture?
     var cvConfiTexture: CVMetalTexture?
-    var cvSmoothDepthTexture: CVMetalTexture?
-    var cvSmoothConfiTexture: CVMetalTexture?
     var imagePlaneVertexBuffer: MTLBuffer!
 
     // Source Image Texture Cache
@@ -156,7 +154,7 @@ class TextureCreator {
     // Prepares the scene depth information for transfer to the GPU for rendering.
     func updateARDepthTexures(frame: ARFrame) {
         // Get the scene depth or smoothed scene depth from the current frame.
-        guard let sceneDepth = frame.sceneDepth, let smoothSceneDepth = frame.smoothedSceneDepth else {
+        guard let sceneDepth = frame.smoothedSceneDepth else {
             print("Failed to acquire scene depth.")
             arTextures.valid = arTextures.valid && false
             return
@@ -173,15 +171,6 @@ class TextureCreator {
         pixelBuffer = sceneDepth.confidenceMap
         setMTLPixelFormat(&texturePixelFormat, basedOn: pixelBuffer)
         cvConfiTexture = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: texturePixelFormat, planeIndex: 0)
-
-        // Get the current depth confidence values from the current frame.
-        pixelBuffer = smoothSceneDepth.depthMap
-        setMTLPixelFormat(&texturePixelFormat, basedOn: pixelBuffer)
-        cvSmoothDepthTexture = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: texturePixelFormat, planeIndex: 0)
-
-        pixelBuffer = smoothSceneDepth.confidenceMap
-        setMTLPixelFormat(&texturePixelFormat, basedOn: pixelBuffer)
-        cvSmoothConfiTexture = createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: texturePixelFormat, planeIndex: 0)
     }
 
     func createTexture(fromPixelBuffer pixelBuffer: CVPixelBuffer, pixelFormat: MTLPixelFormat, planeIndex: Int) -> CVMetalTexture? {
@@ -219,20 +208,18 @@ class TextureCreator {
     }
 
     func makeDepthTextures() {
-        guard let depthTexture = cvDepthTexture, let smoothDepthTexture = cvSmoothDepthTexture else {
+        guard let depthTexture = cvDepthTexture else {
             arTextures.valid = arTextures.valid && false
             return
         }
         arTextures.rawDepthTexture = CVMetalTextureGetTexture(depthTexture)
-        arTextures.rawSmoothDepthTexture = CVMetalTextureGetTexture(smoothDepthTexture)
     }
     
     func makeConfiTextures(){
-        guard let confiTexture = cvConfiTexture, let smoothConfiTexture = cvSmoothConfiTexture else {
+        guard let confiTexture = cvConfiTexture else {
             arTextures.valid = arTextures.valid && false
             return
         }
         arTextures.confiTexture = CVMetalTextureGetTexture(confiTexture)
-        arTextures.smoothConfiTexture = CVMetalTextureGetTexture(smoothConfiTexture)
     }
 }
