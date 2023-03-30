@@ -14,7 +14,6 @@ class Filterer {
     let arTextures: ARTextureContainer
     
     var depthRenderPassDescriptor: MTLRenderPassDescriptor!
-    var smoothRenderPassDescriptor: MTLRenderPassDescriptor!
     var renderPipelineState: MTLRenderPipelineState!
     var imagePlaneVertexBuffer: MTLBuffer!
     
