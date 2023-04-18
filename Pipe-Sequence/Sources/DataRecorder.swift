@@ -152,7 +152,7 @@ class DataRecorder {
 
     func saveCameraPose(frame: ARFrame) {
         // save camera pose of the frame
-        let viewMatrix = frame.camera.transform
+        let viewMatrix = frame.camera.viewMatrix(for: UIInterfaceOrientation.landscapeRight)
         let timestamp = frame.timestamp * self.mulSecondToNanoSecond
         let r_11 = viewMatrix.columns.0.x
         let r_12 = viewMatrix.columns.1.x
@@ -170,12 +170,18 @@ class DataRecorder {
         let t_y = viewMatrix.columns.3.y
         let t_z = viewMatrix.columns.3.z
 
+        let r_41 = viewMatrix.columns.0.w
+        let r_42 = viewMatrix.columns.1.w
+        let r_43 = viewMatrix.columns.2.w
+        let r_44 = viewMatrix.columns.3.w
+
         var url = self.dirURLs[self.DIR_CAMERA_POSE]
         url.appendPathComponent(String(format: "%.0f.txt", timestamp))
-        let ARKitPoseData = String(format: "%.6f %.6f %.6f %.6f\n%.6f %.6f %.6f %.6f\n%.6f %.6f %.6f %.6f\n",
+        let ARKitPoseData = String(format: "%.6f %.6f %.6f %.6f\n%.6f %.6f %.6f %.6f\n%.6f %.6f %.6f %.6f\n%.6f %.6f %.6f %.6f\n",
                                    r_11, r_12, r_13, t_x,
                                    r_21, r_22, r_23, t_y,
-                                   r_31, r_32, r_33, t_z)
+                                   r_31, r_32, r_33, t_z,
+                                   r_41, r_42, r_43, r_44)
                                 
         if (!FileManager.default.createFile(atPath: url.path, contents: ARKitPoseData.data(using: String.Encoding.utf8), attributes: nil)) {
             os_log("Failed to create file", log: OSLog.default, type: .fault)
